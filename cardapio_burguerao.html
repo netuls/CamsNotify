@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burguerão — Cardápio Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#FFF9F0;}
+
+.hero{background:#FF4B2B;padding:28px 20px 20px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:#FFD93D;border-radius:50%;opacity:0.4;}
+.hero::after{content:'';position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:#FF6B6B;border-radius:50%;opacity:0.3;}
+.logo{font-family:'Fredoka One',cursive;font-size:36px;color:#fff;letter-spacing:1px;position:relative;z-index:1;}
+.logo span{color:#FFD93D;}
+.tagline{font-size:13px;color:rgba(255,255,255,0.85);margin-top:4px;font-weight:600;letter-spacing:2px;text-transform:uppercase;position:relative;z-index:1;}
+
+.categories{display:flex;gap:10px;padding:18px 16px 10px;overflow-x:auto;scrollbar-width:none;}
+.categories::-webkit-scrollbar{display:none;}
+.cat-btn{border:none;border-radius:50px;padding:9px 18px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;background:#fff;color:#888;border:2px solid #eee;}
+.cat-btn.active{color:#fff;border-color:transparent;}
+.cat-btn[data-cat="burgers"].active{background:#FF4B2B;}
+.cat-btn[data-cat="porcoes"].active{background:#FF9500;}
+.cat-btn[data-cat="bebidas"].active{background:#00B4D8;}
+.cat-btn[data-cat="sobremesas"].active{background:#FF6B9D;}
+
+.section-title{font-family:'Fredoka One',cursive;font-size:22px;padding:8px 16px 4px;color:#222;}
+
+.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 16px;}
+
+.item-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);cursor:pointer;transition:transform .15s;}
+.item-card:active{transform:scale(0.97);}
+.item-img{width:100%;height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;}
+.item-img.burgers{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);}
+.item-img.porcoes{background:linear-gradient(135deg,#FFF8E1,#FFF0C2);}
+.item-img.bebidas{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);}
+.item-img.sobremesas{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);}
+
+.item-info{padding:10px 12px 12px;}
+.item-name{font-size:13px;font-weight:800;color:#222;line-height:1.3;}
+.item-desc{font-size:11px;color:#999;margin-top:3px;line-height:1.4;}
+.item-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.item-price{font-family:'Fredoka One',cursive;font-size:16px;color:#FF4B2B;}
+.add-btn{width:28px;height:28px;border-radius:50%;border:none;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-weight:700;line-height:1;transition:transform .1s;}
+.add-btn:active{transform:scale(0.9);}
+
+.cart-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#FF4B2B;color:#fff;border:none;border-radius:50px;padding:14px 28px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(255,75,43,0.4);transition:all .2s;width:calc(100% - 32px);max-width:400px;justify-content:space-between;}
+.cart-bar.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px);}
+.cart-total{background:rgba(255,255,255,0.25);border-radius:20px;padding:4px 12px;font-size:14px;}
+.badge{background:#FFD93D;color:#333;border-radius:50%;width:20px;height:20px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:800;}
+
+.menu-wrap{padding-bottom:80px;}
+</style>
+</head>
+<body>
+
+<div class="menu-wrap">
+  <div class="hero">
+    <div class="logo">Burguer<span>ão</span> 🍔</div>
+    <div class="tagline">Sabor de verdade, feito com amor</div>
+  </div>
+
+  <div class="categories">
+    <button class="cat-btn active" data-cat="burgers" onclick="filter('burgers')">🍔 Burgers</button>
+    <button class="cat-btn" data-cat="porcoes" onclick="filter('porcoes')">🍟 Porções</button>
+    <button class="cat-btn" data-cat="bebidas" onclick="filter('bebidas')">🥤 Bebidas</button>
+    <button class="cat-btn" data-cat="sobremesas" onclick="filter('sobremesas')">🍨 Sobremesas</button>
+  </div>
+
+  <div id="menu-content"></div>
+</div>
+
+<button class="cart-bar hidden" id="cart-bar" onclick="alert('Integre com seu sistema de pedidos! 😉')">
+  <span>🛒 Ver pedido <span class="badge" id="cart-count">0</span></span>
+  <span class="cart-total" id="cart-total">R$ 0,00</span>
+</button>
+
+<script>
+const menu = {
+  burgers: {
+    label: '🍔 Burgers',
+    color: '#FF4B2B',
+    items: [
+      {name:'Classic Smash', desc:'Blend artesanal, queijo, alface, tomate e molho especial', price:29.90, emoji:'🍔'},
+      {name:'Double Bacon', desc:'Duplo blend, bacon crocante, cheddar e cebola caramelizada', price:38.90, emoji:'🥩'},
+      {name:'Frango Crispy', desc:'Frango empanado crocante, maionese de alho e picles', price:27.90, emoji:'🍗'},
+      {name:'Veggie Supreme', desc:'Blend de grão-de-bico, rúcula, tomate seco e cream cheese', price:28.90, emoji:'🥦'},
+      {name:'BBQ Monster', desc:'Triplo blend, onion rings, molho bbq defumado', price:45.90, emoji:'🔥'},
+      {name:'Kids Burguer', desc:'Mini blend, queijo e batata palha', price:19.90, emoji:'⭐'},
+    ]
+  },
+  porcoes: {
+    label: '🍟 Porções',
+    color: '#FF9500',
+    items: [
+      {name:'Batata Frita', desc:'Porção crocante com sal grosso e molho cheddar', price:18.90, emoji:'🍟'},
+      {name:'Onion Rings', desc:'Anéis de cebola empanados com molho ranch', price:21.90, emoji:'🧅'},
+      {name:'Nuggets (10un)', desc:'Frango crocante com molho barbecue', price:22.90, emoji:'🍗'},
+      {name:'Batata Rústica', desc:'Temperada com páprica defumada e ervas', price:20.90, emoji:'🥔'},
+    ]
+  },
+  bebidas: {
+    label: '🥤 Bebidas',
+    color: '#00B4D8',
+    items: [
+      {name:'Milk Shake', desc:'Chocolate, morango ou baunilha — 400ml', price:18.90, emoji:'🥛'},
+      {name:'Coca-Cola', desc:'Gelada 350ml', price:7.90, emoji:'🥤'},
+      {name:'Suco Natural', desc:'Laranja, maracujá ou limão — 400ml', price:12.90, emoji:'🍊'},
+      {name:'Água com Gás', desc:'500ml bem gelada', price:5.90, emoji:'💧'},
+    ]
+  },
+  sobremesas: {
+    label: '🍨 Sobremesas',
+    color: '#FF6B9D',
+    items: [
+      {name:'Brownie Quente', desc:'Com sorvete de creme e calda de chocolate', price:19.90, emoji:'🍫'},
+      {name:'Açaí 500ml', desc:'Granola, banana e leite condensado', price:22.90, emoji:'🫐'},
+      {name:'Sorvete Casquinha', desc:'2 bolas — chocolate ou creme', price:8.90, emoji:'🍦'},
+      {name:'Waffle Doce', desc:'Com nutella, morango e chantilly', price:17.90, emoji:'🧇'},
+    ]
+  }
+};
+
+let cart = 0;
+let total = 0;
+
+function filter(cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-cat="'+cat+'"]').classList.add('active');
+  render(cat);
+}
+
+function render(cat) {
+  const data = menu[cat];
+  let html = '<div class="section-title">'+data.label+'</div><div class="items-grid">';
+  data.items.forEach(function(item) {
+    html += '<div class="item-card">'
+      + '<div class="item-img '+cat+'">'+item.emoji+'</div>'
+      + '<div class="item-info">'
+      + '<div class="item-name">'+item.name+'</div>'
+      + '<div class="item-desc">'+item.desc+'</div>'
+      + '<div class="item-bottom">'
+      + '<div class="item-price">R$ '+item.price.toFixed(2).replace('.',',')+'</div>'
+      + '<button class="add-btn" style="background:'+data.color+'" onclick="addCart('+item.price+')">+</button>'
+      + '</div></div></div>';
+  });
+  html += '</div>';
+  document.getElementById('menu-content').innerHTML = html;
+}
+
+function addCart(price) {
+  cart++;
+  total += price;
+  document.getElementById('cart-count').textContent = cart;
+  document.getElementById('cart-total').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  document.getElementById('cart-bar').classList.remove('hidden');
+}
+
+render('burgers');
+</script>
+</body>
+</html>
