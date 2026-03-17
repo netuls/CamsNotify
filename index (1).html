@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burguerão — Cardápio Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E8391A;--red-light:#FFF0EC;--yellow:#FFD93D;
+  --orange:#FF7F2A;--teal:#0DB39E;--pink:#FF6B9D;--blue:#3B9EE0;
+  --bg:#FFF8F5;--card:#fff;--text:#1A1A1A;--muted:#888;--border:#F0EDE8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+
+.hero{background:var(--red);padding:32px 20px 52px;text-align:center;position:relative;overflow:hidden;}
+.hero-blob1{position:absolute;width:180px;height:180px;background:rgba(255,217,61,0.25);border-radius:50%;top:-60px;right:-40px;}
+.hero-blob2{position:absolute;width:100px;height:100px;background:rgba(255,255,255,0.1);border-radius:50%;bottom:-30px;left:20px;}
+.logo{font-family:'Fredoka One',cursive;font-size:40px;color:#fff;position:relative;z-index:1;}
+.logo span{color:var(--yellow);}
+.tagline{font-size:12px;color:rgba(255,255,255,0.8);margin-top:6px;font-weight:700;letter-spacing:3px;text-transform:uppercase;position:relative;z-index:1;}
+
+.wave{display:block;margin-top:-2px;}
+
+.categories{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;margin-top:-24px;position:relative;z-index:2;}
+.categories::-webkit-scrollbar{display:none;}
+.cat-btn{border:none;border-radius:50px;padding:10px 18px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .2s;background:#fff;color:#aaa;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+.cat-btn.active{color:#fff;}
+.cat-btn[data-cat="burgers"].active{background:var(--red);}
+.cat-btn[data-cat="porcoes"].active{background:var(--orange);}
+.cat-btn[data-cat="bebidas"].active{background:var(--blue);}
+.cat-btn[data-cat="sobremesas"].active{background:var(--pink);}
+
+.section-title{font-family:'Fredoka One',cursive;font-size:20px;padding:12px 16px 6px;color:var(--text);}
+.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:4px 16px 16px;}
+.item-card{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,0.08);transition:transform .15s,box-shadow .15s;}
+.item-card:active{transform:scale(0.97);}
+
+.food-art{width:100%;height:120px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.food-art svg{width:80px;height:80px;}
+.fa-burgers{background:linear-gradient(160deg,#FFF3E0,#FFE0B2);}
+.fa-porcoes{background:linear-gradient(160deg,#FFFDE7,#FFF9C4);}
+.fa-bebidas{background:linear-gradient(160deg,#E3F2FD,#BBDEFB);}
+.fa-sobremesas{background:linear-gradient(160deg,#FCE4EC,#F8BBD0);}
+
+.item-info{padding:11px 13px 13px;}
+.item-name{font-size:13px;font-weight:900;color:var(--text);line-height:1.3;}
+.item-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;}
+.item-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:9px;}
+.item-price{font-family:'Fredoka One',cursive;font-size:17px;color:var(--red);}
+.add-btn{width:30px;height:30px;border-radius:50%;border:none;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-weight:900;line-height:1;transition:transform .1s;}
+.add-btn:active{transform:scale(0.85);}
+
+.cart-bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;border:none;border-radius:50px;padding:15px 24px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(232,57,26,0.45);transition:all .3s;width:calc(100% - 32px);max-width:420px;justify-content:space-between;}
+.cart-bar.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(24px);}
+.cart-total-pill{background:rgba(255,255,255,0.22);border-radius:20px;padding:4px 13px;font-size:14px;}
+.badge{background:var(--yellow);color:#333;border-radius:50%;width:22px;height:22px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;}
+.menu-wrap{padding-bottom:90px;}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.52);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;padding:20px 20px 32px;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);}
+.overlay.open .sheet{transform:translateY(0);}
+.sheet-handle{width:42px;height:5px;background:#eee;border-radius:3px;margin:0 auto 18px;}
+.sheet-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--text);margin-bottom:4px;}
+.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+
+.cart-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+.cart-emoji{font-size:30px;width:46px;text-align:center;flex-shrink:0;}
+.cart-info{flex:1;}
+.cart-name{font-size:14px;font-weight:800;color:var(--text);}
+.cart-sub-price{font-size:13px;color:var(--red);font-weight:700;margin-top:2px;}
+.qty-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.qty-btn{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:#fff;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;}
+.qty-num{font-size:14px;font-weight:900;min-width:20px;text-align:center;}
+
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0 6px;}
+.total-label{font-size:16px;font-weight:700;color:#555;}
+.total-value{font-family:'Fredoka One',cursive;font-size:26px;color:var(--red);}
+
+.input-label{font-size:13px;font-weight:800;color:#444;margin-bottom:6px;display:block;margin-top:14px;}
+.input-field{width:100%;border:2px solid var(--border);border-radius:14px;padding:13px 15px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border .2s;color:var(--text);background:#fff;}
+.input-field:focus{border-color:var(--red);}
+.input-field::placeholder{color:#ccc;}
+
+/* SUCO MODAL */
+.suco-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.suco-overlay.open{opacity:1;pointer-events:all;}
+.suco-modal{background:#fff;border-radius:22px;padding:22px;width:100%;max-width:340px;transform:scale(0.92);transition:transform .2s;}
+.suco-overlay.open .suco-modal{transform:scale(1);}
+.suco-title{font-family:'Fredoka One',cursive;font-size:20px;color:var(--text);margin-bottom:6px;}
+.suco-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+.suco-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.suco-opt{border:2px solid var(--border);border-radius:14px;padding:11px 8px;cursor:pointer;text-align:center;transition:all .15s;background:#fff;}
+.suco-opt.selected{border-color:var(--blue);background:#EBF6FF;}
+.suco-opt-icon{font-size:26px;display:block;margin-bottom:4px;}
+.suco-opt-label{font-size:12px;font-weight:800;color:#555;}
+.suco-opt.selected .suco-opt-label{color:var(--blue);}
+.btn-suco-ok{width:100%;background:var(--blue);color:#fff;border:none;border-radius:50px;padding:13px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;}
+
+/* PAGAMENTO */
+.pay-title{font-size:14px;font-weight:800;color:#333;margin:18px 0 4px;}
+.pay-note{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;}
+.pay-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+.pay-opt{border:2px solid var(--border);border-radius:14px;padding:11px 8px;cursor:pointer;text-align:center;transition:all .18s;background:#fff;position:relative;}
+.pay-opt.selected{border-color:var(--red);background:var(--red-light);}
+.pay-check{position:absolute;top:7px;right:9px;width:17px;height:17px;border-radius:50%;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;transition:all .15s;color:#fff;}
+.pay-opt.selected .pay-check{background:var(--red);border-color:var(--red);}
+.pay-opt-icon{font-size:26px;display:block;margin-bottom:5px;}
+.pay-opt-label{font-size:12px;font-weight:800;color:#555;}
+.pay-opt.selected .pay-opt-label{color:var(--red);}
+
+.troco-row{display:none;margin-bottom:2px;}
+.troco-row.show{display:block;}
+
+.btn-finalizar{width:100%;background:var(--red);color:#fff;border:none;border-radius:50px;padding:16px;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;margin-top:16px;box-shadow:0 6px 20px rgba(232,57,26,0.35);transition:transform .1s;}
+.btn-finalizar:active{transform:scale(0.98);}
+
+.success-screen{text-align:center;padding:28px 0 12px;}
+.success-icon{font-size:70px;margin-bottom:14px;}
+.success-title{font-family:'Fredoka One',cursive;font-size:28px;color:var(--teal);margin-bottom:10px;}
+.success-msg{font-size:14px;color:#888;line-height:1.7;margin-bottom:26px;}
+.btn-fechar{width:100%;background:var(--teal);color:#fff;border:none;border-radius:50px;padding:15px;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;}
+
+.cart-empty{text-align:center;padding:36px 0;color:#ccc;}
+.cart-empty-icon{font-size:52px;margin-bottom:10px;}
+.divider{height:1px;background:var(--border);margin:4px 0;}
+</style>
+</head>
+<body>
+<div class="menu-wrap">
+  <div class="hero">
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="logo">Burguer<span>ão</span> 🍔</div>
+    <div class="tagline">Sabor de verdade, feito com amor</div>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 40" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" height="40" style="display:block;background:var(--red);"><path fill="#FFF8F5" d="M0,20 C360,60 1080,-20 1440,20 L1440,40 L0,40 Z"/></svg>
+
+  <div class="categories">
+    <button class="cat-btn active" data-cat="burgers" onclick="filter('burgers')">🍔 Burgers</button>
+    <button class="cat-btn" data-cat="porcoes" onclick="filter('porcoes')">🍟 Porções</button>
+    <button class="cat-btn" data-cat="bebidas" onclick="filter('bebidas')">🥤 Bebidas</button>
+    <button class="cat-btn" data-cat="sobremesas" onclick="filter('sobremesas')">🍨 Sobremesas</button>
+  </div>
+  <div id="menu-content"></div>
+</div>
+
+<button class="cart-bar hidden" id="cart-bar" onclick="openCart()">
+  <span>🛒 Ver pedido <span class="badge" id="cart-count">0</span></span>
+  <span class="cart-total-pill" id="cart-total-bar">R$ 0,00</span>
+</button>
+
+<!-- OVERLAY CARRINHO -->
+<div class="overlay" id="overlay" onclick="closeIfOutside(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<!-- MODAL SABOR SUCO -->
+<div class="suco-overlay" id="suco-overlay">
+  <div class="suco-modal">
+    <div class="suco-title">🍊 Escolha o sabor</div>
+    <div class="suco-sub">Selecione o sabor do seu suco natural</div>
+    <div class="suco-opts">
+      <div class="suco-opt" id="suco-laranja"   onclick="selectSuco('Laranja')">  <span class="suco-opt-icon">🍊</span><span class="suco-opt-label">Laranja</span></div>
+      <div class="suco-opt" id="suco-maracuja"  onclick="selectSuco('Maracujá')"> <span class="suco-opt-icon">🌼</span><span class="suco-opt-label">Maracujá</span></div>
+      <div class="suco-opt" id="suco-limao"     onclick="selectSuco('Limão')">    <span class="suco-opt-icon">🍋</span><span class="suco-opt-label">Limão</span></div>
+      <div class="suco-opt" id="suco-abacaxi"   onclick="selectSuco('Abacaxi')">  <span class="suco-opt-icon">🍍</span><span class="suco-opt-label">Abacaxi</span></div>
+      <div class="suco-opt" id="suco-morango"   onclick="selectSuco('Morango')">  <span class="suco-opt-icon">🍓</span><span class="suco-opt-label">Morango</span></div>
+      <div class="suco-opt" id="suco-acerola"   onclick="selectSuco('Acerola')">  <span class="suco-opt-icon">🍒</span><span class="suco-opt-label">Acerola</span></div>
+    </div>
+    <button class="btn-suco-ok" onclick="confirmSuco()">Confirmar sabor</button>
+  </div>
+</div>
+
+<script>
+const WHATSAPP = '5585996870852';
+
+const svgs = {
+  burger:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="58" rx="28" ry="7" fill="#D4823A"/><rect x="13" y="44" width="54" height="14" rx="4" fill="#E8973E"/><rect x="15" y="42" width="50" height="6" rx="2" fill="#5A9E3A"/><rect x="15" y="36" width="50" height="8" rx="2" fill="#D4563A"/><rect x="15" y="30" width="50" height="8" rx="2" fill="#F0C040"/><ellipse cx="40" cy="28" rx="28" ry="10" fill="#E8973E"/><ellipse cx="40" cy="25" rx="26" ry="8" fill="#D4823A"/><ellipse cx="30" cy="24" rx="5" ry="3" fill="#C47030" opacity="0.5"/><ellipse cx="48" cy="23" rx="4" ry="2.5" fill="#C47030" opacity="0.5"/></svg>`,
+  double:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="62" rx="27" ry="7" fill="#C4732A" opacity="0.35"/><rect x="13" y="50" width="54" height="12" rx="4" fill="#E8973E"/><rect x="15" y="43" width="50" height="8" rx="2" fill="#D4563A"/><rect x="15" y="37" width="50" height="7" rx="2" fill="#F0C040"/><rect x="15" y="30" width="50" height="8" rx="2" fill="#D4563A"/><rect x="15" y="24" width="50" height="7" rx="2" fill="#5A9E3A"/><ellipse cx="40" cy="23" rx="27" ry="9" fill="#E8973E"/><ellipse cx="40" cy="20" rx="25" ry="7" fill="#D4823A"/></svg>`,
+  frango:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="60" rx="26" ry="7" fill="#C4832A" opacity="0.4"/><rect x="16" y="46" width="48" height="14" rx="7" fill="#E8A83E"/><rect x="18" y="40" width="44" height="12" rx="6" fill="#F2C060"/><rect x="20" y="34" width="40" height="10" rx="5" fill="#E8A83E"/><ellipse cx="32" cy="34" rx="4" ry="3" fill="#D49030" opacity="0.6"/><ellipse cx="48" cy="35" rx="3" ry="2.5" fill="#D49030" opacity="0.6"/><ellipse cx="40" cy="33" rx="3" ry="2" fill="#D49030" opacity="0.6"/></svg>`,
+  veggie:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="58" rx="26" ry="7" fill="#C4832A" opacity="0.3"/><rect x="14" y="44" width="52" height="14" rx="4" fill="#B8D458"/><rect x="16" y="38" width="48" height="8" rx="3" fill="#E8C840"/><rect x="16" y="30" width="48" height="10" rx="3" fill="#78B83A"/><ellipse cx="40" cy="28" rx="27" ry="9" fill="#E8A83E"/><ellipse cx="40" cy="25" rx="25" ry="7" fill="#D4823A"/></svg>`,
+  bbq:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="60" rx="27" ry="7" fill="#8B3010" opacity="0.3"/><rect x="13" y="48" width="54" height="12" rx="4" fill="#C84010"/><rect x="15" y="42" width="50" height="7" rx="2" fill="#D4823A"/><rect x="15" y="35" width="50" height="8" rx="2" fill="#8B3010"/><rect x="15" y="28" width="50" height="8" rx="2" fill="#D4823A"/><rect x="15" y="22" width="50" height="7" rx="2" fill="#5A9E3A"/><ellipse cx="40" cy="20" rx="27" ry="9" fill="#C84010"/><ellipse cx="40" cy="17" rx="25" ry="7" fill="#A83010"/></svg>`,
+  kids:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="58" rx="22" ry="6" fill="#E8973E" opacity="0.4"/><rect x="18" y="46" width="44" height="12" rx="4" fill="#E8973E"/><rect x="20" y="40" width="40" height="7" rx="2" fill="#F0C040"/><rect x="20" y="34" width="40" height="7" rx="2" fill="#D4563A"/><ellipse cx="40" cy="32" rx="22" ry="8" fill="#E8973E"/><ellipse cx="40" cy="29" rx="20" ry="6" fill="#D4823A"/><circle cx="34" cy="18" r="5" fill="#FFD93D"/><circle cx="46" cy="18" r="5" fill="#FFD93D"/><rect x="36" y="14" width="8" height="8" rx="2" fill="#FF6B6B"/></svg>`,
+  batata:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="22" width="8" height="38" rx="4" fill="#F5C842" transform="rotate(-8 32 40)"/><rect x="36" y="20" width="8" height="40" rx="4" fill="#E8B83A" transform="rotate(2 40 40)"/><rect x="44" y="22" width="8" height="38" rx="4" fill="#F5C842" transform="rotate(8 48 40)"/><rect x="20" y="55" width="40" height="12" rx="6" fill="#D4823A"/><rect x="22" y="57" width="36" height="8" rx="4" fill="#E8973E"/></svg>`,
+  onion:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="38" rx="26" ry="8" fill="#F5D890" stroke="#E8C040" stroke-width="3"/><ellipse cx="40" cy="38" rx="19" ry="5" fill="none" stroke="#E8C040" stroke-width="3"/><ellipse cx="40" cy="52" rx="26" ry="8" fill="#F5D890" stroke="#E8C040" stroke-width="3"/><ellipse cx="40" cy="52" rx="19" ry="5" fill="none" stroke="#E8C040" stroke-width="3"/><ellipse cx="40" cy="65" rx="26" ry="8" fill="#F5D890" stroke="#E8C040" stroke-width="3"/><ellipse cx="40" cy="65" rx="19" ry="5" fill="none" stroke="#E8C040" stroke-width="3"/></svg>`,
+  nugget:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="28" cy="42" rx="14" ry="10" fill="#E8A83E"/><ellipse cx="52" cy="38" rx="13" ry="9" fill="#F2C060"/><ellipse cx="32" cy="56" rx="12" ry="8" fill="#E8A83E"/><ellipse cx="54" cy="54" rx="11" ry="8" fill="#F2C060"/><ellipse cx="28" cy="41" rx="11" ry="7" fill="#F2C060" opacity="0.6"/></svg>`,
+  rustica:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="55" rx="10" ry="15" fill="#E8A838" transform="rotate(-15 26 55)"/><ellipse cx="40" cy="50" rx="10" ry="16" fill="#F0B848"/><ellipse cx="54" cy="54" rx="9" ry="14" fill="#E8A838" transform="rotate(12 54 54)"/><ellipse cx="26" cy="52" rx="7" ry="11" fill="#F5C860" opacity="0.6" transform="rotate(-15 26 52)"/><ellipse cx="40" cy="47" rx="7" ry="12" fill="#F5C860" opacity="0.6"/><ellipse cx="54" cy="51" rx="6" ry="10" fill="#F5C860" opacity="0.6" transform="rotate(12 54 51)"/></svg>`,
+  shake:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="30" width="28" height="38" rx="8" fill="#F5A0C0"/><rect x="28" y="32" width="24" height="34" rx="6" fill="#FFBDD4"/><rect x="26" y="26" width="28" height="10" rx="4" fill="#E87090"/><rect x="35" y="15" width="4" height="15" rx="2" fill="#ccc"/><ellipse cx="40" cy="26" rx="16" ry="5" fill="#D85080"/><circle cx="40" cy="22" r="8" fill="#FF6090"/><ellipse cx="37" cy="20" rx="3" ry="2" fill="#fff" opacity="0.4"/></svg>`,
+  coca:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="27" y="28" width="26" height="38" rx="8" fill="#C83030"/><rect x="29" y="30" width="22" height="34" rx="6" fill="#E84040"/><rect x="27" y="24" width="26" height="10" rx="4" fill="#A82020"/><rect x="34" y="14" width="4" height="12" rx="2" fill="#ccc"/><rect x="29" y="36" width="6" height="20" rx="3" fill="#fff" opacity="0.15"/><ellipse cx="40" cy="24" rx="14" ry="4" fill="#C83030"/></svg>`,
+  suco:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="27" y="28" width="26" height="38" rx="8" fill="#F5A030"/><rect x="29" y="30" width="22" height="34" rx="6" fill="#FFB840"/><rect x="27" y="24" width="26" height="10" rx="4" fill="#E08820"/><rect x="34" y="14" width="4" height="12" rx="2" fill="#ccc"/><circle cx="46" cy="18" r="7" fill="#FF8C00"/><circle cx="46" cy="18" r="4" fill="#FFA020"/><rect x="29" y="36" width="5" height="18" rx="2.5" fill="#fff" opacity="0.2"/></svg>`,
+  agua:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="26" width="24" height="40" rx="8" fill="#A8D8F0"/><rect x="30" y="28" width="20" height="36" rx="6" fill="#C8ECF8"/><rect x="28" y="22" width="24" height="10" rx="4" fill="#80B8D8"/><rect x="34" y="13" width="4" height="11" rx="2" fill="#ccc"/><ellipse cx="36" cy="44" rx="4" ry="6" fill="#fff" opacity="0.3"/><circle cx="46" cy="38" r="2" fill="#fff" opacity="0.25"/></svg>`,
+  brownie:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="40" width="48" height="24" rx="8" fill="#5C3010"/><rect x="18" y="38" width="44" height="22" rx="7" fill="#7A4018"/><path d="M18 48 Q40 38 62 48" stroke="#8B5020" stroke-width="3" fill="none"/><ellipse cx="40" cy="36" rx="20" ry="8" fill="#fff" opacity="0.9"/><ellipse cx="40" cy="35" rx="18" ry="6" fill="#F8F0F0"/><circle cx="33" cy="50" r="3" fill="#3A1A05" opacity="0.5"/><circle cx="47" cy="48" r="2.5" fill="#3A1A05" opacity="0.5"/></svg>`,
+  acai:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="32" width="40" height="32" rx="6" fill="#5A2880"/><rect x="22" y="30" width="36" height="10" rx="4" fill="#7A3898"/><ellipse cx="40" cy="30" rx="19" ry="6" fill="#6A3090"/><circle cx="30" cy="42" r="4" fill="#7A3898" opacity="0.6"/><circle cx="45" cy="40" r="3.5" fill="#8B48A8" opacity="0.5"/><circle cx="38" cy="48" r="3" fill="#7A3898" opacity="0.4"/><rect x="34" y="19" width="12" height="12" rx="3" fill="#F8D060"/><rect x="36" y="21" width="8" height="8" rx="2" fill="#FAE080"/></svg>`,
+  sorvete:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="40,70 28,40 52,40" fill="#E8C870"/><ellipse cx="40" cy="39" rx="13" ry="9" fill="#F8E0A0"/><circle cx="40" cy="30" r="12" fill="#FFD0B0"/><circle cx="33" cy="35" r="9" fill="#F8B0C0"/><circle cx="40" cy="28" r="2" fill="#fff" opacity="0.5"/></svg>`,
+  waffle:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="30" width="50" height="32" rx="8" fill="#E8A838"/><rect x="17" y="32" width="46" height="28" rx="6" fill="#F0B848"/><line x1="25" y1="32" x2="25" y2="60" stroke="#D49030" stroke-width="2"/><line x1="35" y1="32" x2="35" y2="60" stroke="#D49030" stroke-width="2"/><line x1="45" y1="32" x2="45" y2="60" stroke="#D49030" stroke-width="2"/><line x1="55" y1="32" x2="55" y2="60" stroke="#D49030" stroke-width="2"/><line x1="17" y1="40" x2="63" y2="40" stroke="#D49030" stroke-width="2"/><line x1="17" y1="50" x2="63" y2="50" stroke="#D49030" stroke-width="2"/><path d="M20 28 Q40 14 60 28" fill="#7B3F00" opacity="0.85"/><circle cx="32" cy="22" r="3" fill="#E8405A" opacity="0.9"/><circle cx="48" cy="20" r="2.5" fill="#E8405A" opacity="0.9"/></svg>`
+};
+
+const emojiMap={burger:'🍔',double:'🍔',frango:'🍗',veggie:'🥦',bbq:'🔥',kids:'⭐',batata:'🍟',onion:'🧅',nugget:'🍗',rustica:'🥔',shake:'🥛',coca:'🥤',suco:'🍊',agua:'💧',brownie:'🍫',acai:'🫐',sorvete:'🍦',waffle:'🧇'};
+
+const menu = {
+  burgers:{label:'🍔 Burgers',color:'#E8391A',items:[
+    {name:'Classic Smash',  desc:'Blend artesanal, queijo, alface, tomate e molho especial', price:29.90,svg:'burger'},
+    {name:'Double Bacon',   desc:'Duplo blend, bacon crocante, cheddar e cebola caramelizada',price:38.90,svg:'double'},
+    {name:'Frango Crispy',  desc:'Frango empanado crocante, maionese de alho e picles',       price:27.90,svg:'frango'},
+    {name:'Veggie Supreme', desc:'Blend de grão-de-bico, rúcula, tomate seco e cream cheese', price:28.90,svg:'veggie'},
+    {name:'BBQ Monster',    desc:'Triplo blend, onion rings, molho bbq defumado',             price:45.90,svg:'bbq'},
+    {name:'Kids Burguer',   desc:'Mini blend, queijo e batata palha',                         price:19.90,svg:'kids'},
+  ]},
+  porcoes:{label:'🍟 Porções',color:'#FF7F2A',items:[
+    {name:'Batata Frita',   desc:'Porção crocante com sal grosso e molho cheddar',            price:18.90,svg:'batata'},
+    {name:'Onion Rings',    desc:'Anéis de cebola empanados com molho ranch',                 price:21.90,svg:'onion'},
+    {name:'Nuggets (10un)', desc:'Frango crocante com molho barbecue',                        price:22.90,svg:'nugget'},
+    {name:'Batata Rústica', desc:'Temperada com páprica defumada e ervas',                    price:20.90,svg:'rustica'},
+  ]},
+  bebidas:{label:'🥤 Bebidas',color:'#3B9EE0',items:[
+    {name:'Milk Shake',     desc:'Chocolate, morango ou baunilha — 400ml',                   price:18.90,svg:'shake', isSuco:false},
+    {name:'Coca-Cola',      desc:'Gelada 350ml',                                              price:7.90, svg:'coca',  isSuco:false},
+    {name:'Suco Natural',   desc:'Laranja, Maracujá, Limão, Abacaxi, Morango ou Acerola',    price:12.90,svg:'suco',  isSuco:true},
+    {name:'Água com Gás',   desc:'500ml bem gelada',                                          price:5.90, svg:'agua',  isSuco:false},
+  ]},
+  sobremesas:{label:'🍨 Sobremesas',color:'#FF6B9D',items:[
+    {name:'Brownie Quente',    desc:'Com sorvete de creme e calda de chocolate',              price:19.90,svg:'brownie'},
+    {name:'Açaí 500ml',        desc:'Granola, banana e leite condensado',                    price:22.90,svg:'acai'},
+    {name:'Sorvete Casquinha', desc:'2 bolas — chocolate ou creme',                          price:8.90, svg:'sorvete'},
+    {name:'Waffle Doce',       desc:'Com nutella, morango e chantilly',                      price:17.90,svg:'waffle'},
+  ]}
+};
+
+let cart=[], selectedPayments=[], pendingSuco=null, currentSabor='';
+
+function fmtPrice(v){return 'R$ '+v.toFixed(2).replace('.',',');}
+function getTotal(){return cart.reduce((s,i)=>s+i.price*i.qty,0);}
+function getCount(){return cart.reduce((s,i)=>s+i.qty,0);}
+
+function updateCartBar(){
+  const n=getCount();
+  document.getElementById('cart-count').textContent=n;
+  document.getElementById('cart-total-bar').textContent=fmtPrice(getTotal());
+  document.getElementById('cart-bar').classList.toggle('hidden',n===0);
+}
+
+function addItem(cat,idx,btn){
+  const item=menu[cat].items[idx];
+  if(item.isSuco){
+    pendingSuco={cat,idx};currentSabor='';
+    document.querySelectorAll('.suco-opt').forEach(e=>e.classList.remove('selected'));
+    document.getElementById('suco-overlay').classList.add('open');
+    return;
+  }
+  doAdd(item.name,item.price,item.svg,'');
+  animBtn(btn);
+}
+
+function doAdd(name,price,svgKey,extra){
+  const key=name+'|'+extra;
+  const f=cart.find(i=>i.key===key);
+  if(f){f.qty++;}else{cart.push({key,name,price,emoji:emojiMap[svgKey]||'🍽️',qty:1,extra});}
+  updateCartBar();
+}
+
+function animBtn(btn){if(!btn)return;btn.style.transform='scale(1.35)';setTimeout(()=>btn.style.transform='',200);}
+
+function selectSuco(s){
+  currentSabor=s;
+  document.querySelectorAll('.suco-opt').forEach(e=>e.classList.remove('selected'));
+  const id='suco-'+s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const el=document.getElementById(id);
+  if(el)el.classList.add('selected');
+}
+
+function confirmSuco(){
+  if(!currentSabor){alert('Escolha um sabor!');return;}
+  const {cat,idx}=pendingSuco;
+  const item=menu[cat].items[idx];
+  doAdd(item.name,item.price,item.svg,'Sabor: '+currentSabor);
+  document.getElementById('suco-overlay').classList.remove('open');
+}
+
+function filter(cat){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('[data-cat="'+cat+'"]').classList.add('active');
+  renderMenu(cat);
+}
+
+function renderMenu(cat){
+  const d=menu[cat];
+  let h='<div class="section-title">'+d.label+'</div><div class="items-grid">';
+  d.items.forEach(function(item,i){
+    h+='<div class="item-card">'
+      +'<div class="food-art fa-'+cat+'">'+(svgs[item.svg]||svgs.burger)+'</div>'
+      +'<div class="item-info">'
+      +'<div class="item-name">'+item.name+'</div>'
+      +'<div class="item-desc">'+item.desc+'</div>'
+      +'<div class="item-bottom">'
+      +'<div class="item-price">'+fmtPrice(item.price)+'</div>'
+      +'<button class="add-btn" style="background:'+d.color+'" onclick="addItem(\''+cat+'\','+i+',this)">+</button>'
+      +'</div></div></div>';
+  });
+  h+='</div>';
+  document.getElementById('menu-content').innerHTML=h;
+}
+
+function openCart(){document.getElementById('overlay').classList.add('open');renderCart();}
+function closeCart(){document.getElementById('overlay').classList.remove('open');}
+function closeIfOutside(e){if(e.target===document.getElementById('overlay'))closeCart();}
+
+function changeQty(key,delta){
+  const k=atob(key);
+  const f=cart.find(i=>i.key===k);
+  if(!f)return;
+  f.qty+=delta;
+  if(f.qty<=0)cart=cart.filter(i=>i.key!==k);
+  updateCartBar();renderCart();
+}
+
+function togglePay(m){
+  const i=selectedPayments.indexOf(m);
+  if(i>-1)selectedPayments.splice(i,1);else selectedPayments.push(m);
+  document.querySelectorAll('.pay-opt').forEach(function(el){
+    const sel=selectedPayments.includes(el.dataset.pay);
+    el.classList.toggle('selected',sel);
+    el.querySelector('.pay-check').textContent=sel?'✓':'';
+  });
+  const t=document.getElementById('troco-row');
+  if(t)t.className='troco-row'+(selectedPayments.includes('dinheiro')?' show':'');
+}
+
+function renderCart(){
+  if(cart.length===0){
+    document.getElementById('sheet-content').innerHTML='<div class="sheet-title">Seu pedido</div><div class="cart-empty"><div class="cart-empty-icon">🛒</div>Nenhum item ainda</div>';
+    return;
+  }
+  let h='<div class="sheet-title">Seu pedido</div><div class="sheet-sub">Confira antes de finalizar</div>';
+  cart.forEach(function(item){
+    const b64=btoa(item.key);
+    h+='<div class="cart-item">'
+      +'<div class="cart-emoji">'+item.emoji+'</div>'
+      +'<div class="cart-info">'
+      +'<div class="cart-name">'+item.name+(item.extra?' <span style="font-size:11px;color:#888;font-weight:600;">('+item.extra+')</span>':'')+'</div>'
+      +'<div class="cart-sub-price">'+fmtPrice(item.price*item.qty)+'</div>'
+      +'<div class="qty-row">'
+      +'<button class="qty-btn" onclick="changeQty(\''+b64+'\',-1)">−</button>'
+      +'<span class="qty-num">'+item.qty+'</span>'
+      +'<button class="qty-btn" onclick="changeQty(\''+b64+'\',1)">+</button>'
+      +'</div></div></div>';
+  });
+  h+='<div class="total-row"><span class="total-label">Total</span><span class="total-value">'+fmtPrice(getTotal())+'</span></div>';
+  h+='<div class="divider"></div>';
+
+  const pays=[{id:'pix',icon:'💠',label:'PIX'},{id:'dinheiro',icon:'💵',label:'Dinheiro'},{id:'credito',icon:'💳',label:'Crédito'},{id:'debito',icon:'🏧',label:'Débito'}];
+  h+='<div class="pay-title">Forma de pagamento</div>';
+  h+='<div class="pay-note">Pode selecionar mais de uma</div>';
+  h+='<div class="pay-options">';
+  pays.forEach(function(p){
+    const sel=selectedPayments.includes(p.id);
+    h+='<div class="pay-opt'+(sel?' selected':'')+'" data-pay="'+p.id+'" onclick="togglePay(\''+p.id+'\')"><div class="pay-check">'+(sel?'✓':'')+'</div><span class="pay-opt-icon">'+p.icon+'</span><span class="pay-opt-label">'+p.label+'</span></div>';
+  });
+  h+='</div>';
+  h+='<div class="troco-row'+(selectedPayments.includes('dinheiro')?' show':'')+'" id="troco-row"><label class="input-label">Troco para quanto?</label><input class="input-field" id="troco-val" type="number" placeholder="Ex: 50.00"></div>';
+
+  h+='<label class="input-label">Seu nome *</label><input class="input-field" id="nome-cliente" type="text" placeholder="Ex: João Silva">';
+  h+='<label class="input-label">Seu WhatsApp *</label><input class="input-field" id="wpp-cliente" type="tel" placeholder="Ex: 85999998888" maxlength="15">';
+  h+='<label class="input-label">Observações (opcional)</label><input class="input-field" id="obs-pedido" type="text" placeholder="Ex: sem cebola, bem passado...">';
+  h+='<button class="btn-finalizar" onclick="finalizar()">Finalizar pedido via WhatsApp 🚀</button>';
+
+  document.getElementById('sheet-content').innerHTML=h;
+}
+
+function finalizar(){
+  const nome=(document.getElementById('nome-cliente')?.value||'').trim();
+  const wpp=(document.getElementById('wpp-cliente')?.value||'').trim();
+  const obs=(document.getElementById('obs-pedido')?.value||'').trim();
+  const troco=(document.getElementById('troco-val')?.value||'').trim();
+
+  if(!nome){alert('Por favor, informe seu nome!');return;}
+  if(!wpp){alert('Por favor, informe seu WhatsApp!');return;}
+  if(selectedPayments.length===0){alert('Selecione ao menos uma forma de pagamento!');return;}
+
+  const lbl={pix:'PIX',dinheiro:'Dinheiro',credito:'Cartão de Crédito',debito:'Cartão de Débito'};
+  const payStr=selectedPayments.map(p=>lbl[p]).join(' + ');
+
+  let msg='🍔 *Novo Pedido — Burguerão*\n\n';
+  msg+='👤 *Cliente:* '+nome+'\n';
+  msg+='📱 *WhatsApp do cliente:* +55'+wpp+'\n\n';
+  msg+='📋 *Itens do pedido:*\n';
+  cart.forEach(function(i){
+    msg+='• '+i.qty+'x '+i.name+(i.extra?' ('+i.extra+')':'')+' — '+fmtPrice(i.price*i.qty)+'\n';
+  });
+  msg+='\n💰 *Total:* '+fmtPrice(getTotal());
+  msg+='\n💳 *Pagamento:* '+payStr;
+  if(selectedPayments.includes('dinheiro')&&troco)msg+='\n💵 *Troco para:* R$ '+parseFloat(troco).toFixed(2).replace('.',',');
+  if(obs)msg+='\n📝 *Obs:* '+obs;
+
+  window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg),'_blank');
+
+  const wppCliente=wpp;
+  cart=[];selectedPayments=[];
+  updateCartBar();
+
+  document.getElementById('sheet-content').innerHTML=
+    '<div class="success-screen">'
+    +'<div class="success-icon">🎉</div>'
+    +'<div class="success-title">Pedido enviado!</div>'
+    +'<div class="success-msg">Pedido enviado com sucesso!<br>O estabelecimento entrará em contato pelo número:<br><strong>'+wppCliente+'</strong></div>'
+    +'<button class="btn-fechar" onclick="closeCart()">Voltar ao cardápio</button>'
+    +'</div>';
+}
+
+renderMenu('burgers');
+</script>
+</body>
+</html>
