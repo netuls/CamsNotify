@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Burgão do Netin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F0F0F;--surface:#181818;--surface2:#222;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --accent:#FF4D1C;--text:#F5F5F0;--text2:#A0A09A;--text3:#5A5A54;
+  --green:#22C55E;--yellow:#F59E0B;--red:#EF4444;--blue:#3B82F6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.login-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:36px 28px;width:100%;max-width:360px;text-align:center;
+}
+.login-logo{font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px;}
+.login-input{
+  width:100%;border:1px solid var(--border2);border-radius:12px;
+  padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;color:var(--text);background:var(--surface2);
+  margin-bottom:12px;transition:border .2s;
+}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{color:var(--text3);}
+.login-btn{
+  width:100%;background:var(--accent);color:#fff;border:none;
+  border-radius:50px;padding:14px;font-size:15px;font-weight:700;
+  cursor:pointer;transition:opacity .15s;
+}
+.login-btn:hover{opacity:0.9;}
+.login-err{font-size:13px;color:var(--red);margin-top:10px;display:none;}
+
+/* ADMIN PANEL */
+.admin-wrap{display:none;min-height:100vh;}
+
+/* HEADER */
+.header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.header-logo{font-size:18px;font-weight:700;color:var(--text);}
+.header-logo span{color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.logout-btn{
+  background:var(--surface2);border:1px solid var(--border2);
+  color:var(--text2);border-radius:8px;padding:7px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;
+}
+
+/* STATS */
+.stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;padding:20px 16px 8px;
+}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:16px;
+}
+.stat-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;}
+.stat-value{font-size:24px;font-weight:700;color:var(--text);}
+.stat-value.green{color:var(--green);}
+.stat-value.accent{color:var(--accent);}
+.stat-value.yellow{color:var(--yellow);}
+
+/* FILTERS */
+.filters{
+  padding:8px 16px 12px;
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+}
+.filters::-webkit-scrollbar{display:none;}
+.filter-btn{
+  flex-shrink:0;border:1px solid var(--border2);border-radius:50px;
+  padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;
+  background:var(--surface2);color:var(--text2);white-space:nowrap;
+}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* SEARCH */
+.search-wrap{padding:0 16px 12px;}
+.search-input{
+  width:100%;border:1px solid var(--border2);border-radius:12px;
+  padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;color:var(--text);background:var(--surface2);
+  transition:border .2s;
+}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--text3);}
+
+/* ORDERS LIST */
+.orders-wrap{padding:0 16px 100px;}
+.section-label{
+  font-size:11px;font-weight:600;color:var(--text3);
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:10px;padding-top:4px;
+}
+.order-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:16px;margin-bottom:10px;
+  cursor:pointer;transition:border-color .2s;
+}
+.order-card:hover{border-color:var(--border2);}
+.order-card.expanded{border-color:var(--accent);}
+.order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.order-name{font-size:15px;font-weight:700;color:var(--text);}
+.order-wpp{font-size:12px;color:var(--text3);margin-top:2px;}
+.order-badge{
+  flex-shrink:0;font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:50px;
+}
+.badge-novo{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-confirmado{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-entregue{background:rgba(90,90,84,0.3);color:var(--text3);}
+.badge-cancelado{background:rgba(239,68,68,0.15);color:var(--red);}
+
+.order-meta{
+  display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;
+}
+.meta-item{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:4px;}
+.meta-item strong{color:var(--text2);font-weight:600;}
+
+.order-total{
+  margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.order-total-label{font-size:13px;color:var(--text3);font-weight:500;}
+.order-total-val{font-size:18px;font-weight:700;color:var(--accent);}
+
+/* EXPANDED DETAILS */
+.order-details{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.order-card.expanded .order-details{display:block;}
+.detail-section{margin-bottom:12px;}
+.detail-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;}
+.item-row{
+  display:flex;justify-content:space-between;
+  font-size:13px;color:var(--text2);padding:4px 0;
+}
+.item-row-name{flex:1;}
+.item-row-price{font-weight:600;color:var(--text);}
+.address-block{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* STATUS ACTIONS */
+.status-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.status-btn{
+  flex:1;border:none;border-radius:8px;padding:9px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  min-width:80px;
+}
+.btn-confirmar{background:rgba(34,197,94,0.15);color:var(--green);}
+.btn-entregar{background:rgba(59,130,246,0.15);color:var(--blue);}
+.btn-cancelar{background:rgba(239,68,68,0.12);color:var(--red);}
+.btn-wpp{background:rgba(34,197,94,0.15);color:var(--green);}
+.btn-preparo{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.btn-rota{background:rgba(139,92,246,0.15);color:#A78BFA;}
+.badge-preparo{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-rota{background:rgba(139,92,246,0.15);color:#A78BFA;}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--text3);}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:0.4;}
+.empty-text{font-size:15px;font-weight:500;}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:14px;}
+
+/* REFRESH BTN */
+.refresh-btn{
+  background:var(--surface2);border:1px solid var(--border2);
+  color:var(--text2);border-radius:8px;padding:7px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;
+}
+.refresh-btn:hover{color:var(--text);}
+
+/* TOTAL BAR */
+.total-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:14px 20px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.total-bar-label{font-size:13px;color:var(--text3);}
+.total-bar-val{font-size:18px;font-weight:700;color:var(--green);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">Burgão do <span>Netin</span></div>
+    <div class="login-sub">Painel Administrativo</div>
+    <input class="login-input" type="password" id="senha-input" placeholder="Senha de acesso" onkeydown="if(event.key==='Enter')fazerLogin()">
+    <button class="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-err" id="login-err">Senha incorreta</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-wrap" id="admin-wrap">
+  <div class="header">
+    <div class="header-logo">Burgão do <span>Netin</span></div>
+    <div class="header-right">
+      <button class="refresh-btn" onclick="carregarPedidos()">Atualizar</button>
+      <button class="logout-btn" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total hoje</div>
+      <div class="stat-value accent" id="stat-total">R$ 0,00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pedidos hoje</div>
+      <div class="stat-value" id="stat-pedidos">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Clientes únicos</div>
+      <div class="stat-value green" id="stat-clientes">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ticket médio</div>
+      <div class="stat-value yellow" id="stat-ticket">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filtrar('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="filtrar('Novo',this)">Novos</button>
+    <button class="filter-btn" onclick="filtrar('Confirmado',this)">Confirmados</button>
+    <button class="filter-btn" onclick="filtrar('Em Preparo',this)">Em Preparo</button>
+    <button class="filter-btn" onclick="filtrar('Em Rota',this)">Em Rota</button>
+    <button class="filter-btn" onclick="filtrar('Entregue',this)">Entregues</button>
+    <button class="filter-btn" onclick="filtrar('Cancelado',this)">Cancelados</button>
+    <button class="filter-btn" onclick="filtrar('hoje',this)">Hoje</button>
+  </div>
+
+  <div class="search-wrap">
+    <input class="search-input" type="text" id="busca" placeholder="Buscar por nome ou WhatsApp..." oninput="renderPedidos()">
+  </div>
+
+  <div class="orders-wrap" id="orders-wrap">
+    <div class="loading">Carregando pedidos...</div>
+  </div>
+
+  <div class="total-bar">
+    <span class="total-bar-label">Faturamento filtrado</span>
+    <span class="total-bar-val" id="total-filtrado">R$ 0,00</span>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.0/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.0/firebase-firestore-compat.min.js"></script>
+<script>
+// ============================================================
+// CONFIGURACAO — cole seus dados do Firebase Console aqui
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAI6Z4Ay6atavjrsBAfc0XWndjeAX8zbCM",
+  authDomain: "admin-restaurante-ebc77.firebaseapp.com",
+  projectId: "admin-restaurante-ebc77",
+  storageBucket: "admin-restaurante-ebc77.firebasestorage.app",
+  messagingSenderId: "883332092146",
+  appId: "1:883332092146:web:43af09519de61e87f1006b"
+};
+
+// SENHA DO PAINEL ADMIN — troque para uma senha sua
+const SENHA_ADMIN = 'gta123gta';
+
+// ============================================================
+
+var db;
+var todosOsPedidos = [];
+var filtroAtual = 'todos';
+
+window.addEventListener('load', function(){
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    db.settings({ experimentalAutoDetectLongPolling: true });
+  } catch(e){
+    console.warn('Firebase init error:', e.message);
+    document.getElementById('orders-wrap').innerHTML =
+      '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao conectar com o Firebase. Verifique as regras do Firestore e tente novamente.</div></div>';
+  }
+});
+
+// ── LOGIN ──
+function fazerLogin(){
+  var senha = document.getElementById('senha-input').value;
+  if(senha === SENHA_ADMIN){
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('admin-wrap').style.display = 'block';
+    carregarPedidos();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('senha-input').value = '';
+  }
+}
+
+function sair(){
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('admin-wrap').style.display = 'none';
+  document.getElementById('senha-input').value = '';
+}
+
+// ── CARREGAR PEDIDOS ──
+function carregarPedidos(){
+  document.getElementById('orders-wrap').innerHTML = '<div class="loading">Carregando pedidos...</div>';
+  db.collection('pedidos')
+    .orderBy('timestamp','desc')
+    .limit(200)
+    .get()
+    .then(function(snap){
+      todosOsPedidos = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        d._id = doc.id;
+        todosOsPedidos.push(d);
+      });
+      atualizarStats();
+      renderPedidos();
+    })
+    .catch(function(e){
+      document.getElementById('orders-wrap').innerHTML =
+        '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Erro ao carregar. Verifique a configuração do Firebase.</div></div>';
+    });
+}
+
+// ── STATS ──
+function atualizarStats(){
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var pedidosHoje = todosOsPedidos.filter(function(p){ return p.data === hoje; });
+  var totalHoje = pedidosHoje.reduce(function(s,p){ return s+p.total; },0);
+  var clientes = [...new Set(todosOsPedidos.map(function(p){ return p.whatsapp; }))].length;
+  var ticket = todosOsPedidos.length > 0 ? todosOsPedidos.reduce(function(s,p){ return s+p.total; },0) / todosOsPedidos.length : 0;
+
+  document.getElementById('stat-total').textContent    = fmtR(totalHoje);
+  document.getElementById('stat-pedidos').textContent  = pedidosHoje.length;
+  document.getElementById('stat-clientes').textContent = clientes;
+  document.getElementById('stat-ticket').textContent   = fmtR(ticket);
+}
+
+// ── FILTRAR ──
+function filtrar(tipo, btn){
+  filtroAtual = tipo;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPedidos();
+}
+
+// ── RENDER PEDIDOS ──
+function renderPedidos(){
+  var busca = (document.getElementById('busca').value || '').toLowerCase();
+  var hoje = new Date().toLocaleDateString('pt-BR');
+
+  var lista = todosOsPedidos.filter(function(p){
+    if(filtroAtual === 'hoje' && p.data !== hoje) return false;
+    if(filtroAtual !== 'todos' && filtroAtual !== 'hoje' && p.status !== filtroAtual) return false;
+    if(busca && !p.nome.toLowerCase().includes(busca) && !p.whatsapp.includes(busca)) return false;
+    return true;
+  });
+
+  var totalFiltrado = lista.reduce(function(s,p){ return s+p.total; },0);
+  document.getElementById('total-filtrado').textContent = fmtR(totalFiltrado);
+
+  if(lista.length === 0){
+    document.getElementById('orders-wrap').innerHTML =
+      '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado</div></div>';
+    return;
+  }
+
+  var html = '<div class="section-label">'+lista.length+' pedido(s)</div>';
+  lista.forEach(function(p){
+    html += buildCard(p);
+  });
+  document.getElementById('orders-wrap').innerHTML = html;
+}
+
+// ── BUILD CARD ──
+function buildCard(p){
+  var badgeClass = {
+    'Novo':'badge-novo',
+    'Confirmado':'badge-confirmado',
+    'Em Preparo':'badge-preparo',
+    'Em Rota':'badge-rota',
+    'Entregue':'badge-entregue',
+    'Cancelado':'badge-cancelado'
+  }[p.status] || 'badge-novo';
+
+  var itensHtml = '';
+  if(p.itens && p.itens.length){
+    p.itens.forEach(function(i){
+      itensHtml += '<div class="item-row">'
+        +'<span class="item-row-name">'+i.qty+'x '+i.nome+(i.extra?' ('+i.extra+')':'')+'</span>'
+        +'<span class="item-row-price">'+fmtR(i.preco*i.qty)+'</span>'
+        +'</div>';
+    });
+  }
+
+  var endHtml = '';
+  if(p.tipo === 'Entrega'){
+    endHtml = '<div class="detail-section">'
+      +'<div class="detail-title">Endereço de entrega</div>'
+      +'<div class="address-block">'+p.endereco+'<br>'+p.bairro+' — CEP: '+p.cep+'</div>'
+      +'</div>';
+  }
+
+  return '<div class="order-card" id="card-'+p._id+'" onclick="toggleCard(\''+p._id+'\')">'
+    +'<div class="order-top">'
+    +'<div><div class="order-name">'+p.nome+'</div>'
+    +'<div class="order-wpp">'+p.whatsapp+' &bull; '+p.data+' '+p.hora+'</div></div>'
+    +'<span class="order-badge '+badgeClass+'">'+p.status+'</span>'
+    +'</div>'
+    +'<div class="order-meta">'
+    +'<div class="meta-item">Tipo: <strong>'+p.tipo+'</strong></div>'
+    +'<div class="meta-item">Pagamento: <strong>'+p.pagamento+'</strong></div>'
+    +(p.observacao ? '<div class="meta-item">Obs: <strong>'+p.observacao+'</strong></div>' : '')
+    +'</div>'
+    +'<div class="order-total">'
+    +'<span class="order-total-label">Total do pedido</span>'
+    +'<span class="order-total-val">'+fmtR(p.total)+'</span>'
+    +'</div>'
+    +'<div class="order-details">'
+    +'<div class="detail-section"><div class="detail-title">Itens</div>'+itensHtml+'</div>'
+    +endHtml
+    +'<div class="status-actions">'
+    +'<button class="status-btn btn-confirmar" onclick="mudarStatus(event,\''+p._id+'\',\'Confirmado\')">Confirmar</button>'
+    +'<button class="status-btn btn-entregar"  onclick="mudarStatus(event,\''+p._id+'\',\'Entregue\')">Entregue</button>'
+    +'<button class="status-btn btn-cancelar"  onclick="mudarStatus(event,\''+p._id+'\',\'Cancelado\')">Cancelar</button>'
+    +'<button class="status-btn btn-wpp"       onclick="abrirWpp(event,\''+p.whatsapp+'\',\''+p.nome+'\')">WhatsApp</button>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+// ── TOGGLE CARD ──
+function toggleCard(id){
+  var card = document.getElementById('card-'+id);
+  if(card) card.classList.toggle('expanded');
+}
+
+// ── MENSAGENS POR STATUS ──
+var mensagens = {
+  'Confirmado': function(nome){
+    return 'Burgao do Netin\n\nOla, ' + nome + '! Seu pedido foi *CONFIRMADO*. Ja estamos separando tudo com muito carinho. Em breve comecamos o preparo!';
+  },
+  'Em Preparo': function(nome){
+    return 'Burgao do Netin\n\nOla, ' + nome + '! Seu pedido esta *EM PREPARO* na nossa cozinha. Ja ja fica prontinho!';
+  },
+  'Em Rota': function(nome){
+    return 'Burgao do Netin\n\nOla, ' + nome + '! Seu pedido *SAIU PARA ENTREGA* e esta a caminho. Fique de olho, ja ja chega!';
+  },
+  'Entregue': function(nome){
+    return 'Burgao do Netin\n\nOla, ' + nome + '! Seu pedido foi *ENTREGUE*. Bom apetite! Obrigado pela preferencia, volte sempre!';
+  },
+  'Cancelado': function(nome){
+    return 'Burgao do Netin\n\nOla, ' + nome + '! Infelizmente seu pedido foi *CANCELADO*. Entre em contato conosco para mais informacoes. Pedimos desculpas pelo transtorno.';
+  }
+};
+
+// ── MUDAR STATUS ──
+function mudarStatus(e, btn, id, novoStatus, wpp, nome){
+  e.stopPropagation();
+
+  // Feedback visual no botao
+  var originalText = btn.textContent;
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  db.collection('pedidos').doc(id).update({status: novoStatus})
+    .then(function(){
+      var p = todosOsPedidos.find(function(x){ return x._id===id; });
+      if(p) p.status = novoStatus;
+      renderPedidos();
+
+      // Disparo automatico para Em Preparo e Em Rota (e demais)
+      if(mensagens[novoStatus] && wpp){
+        var msg = mensagens[novoStatus](nome);
+        // Abre WhatsApp automaticamente com mensagem pronta
+        setTimeout(function(){
+          window.open('https://wa.me/55'+wpp+'?text='+encodeURIComponent(msg),'_blank');
+        }, 300);
+      }
+    })
+    .catch(function(err){
+      btn.textContent = originalText;
+      btn.disabled = false;
+      alert('Erro ao atualizar status: '+err.message);
+    });
+}
+
+// ── ABRIR WHATSAPP ──
+function abrirWpp(e, wpp, nome){
+  e.stopPropagation();
+  var msg = 'Ola '+nome+'! Aqui e o Burgao do Netin. ';
+  window.open('https://wa.me/55'+wpp+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ── HELPERS ──
+function fmtR(v){ return 'R$ '+(v||0).toFixed(2).replace('.',','); }
+
+// Auto-refresh a cada 60 segundos
+setInterval(function(){
+  if(document.getElementById('admin-wrap').style.display !== 'none') carregarPedidos();
+}, 60000);
+</script>
+</body>
+</html>
