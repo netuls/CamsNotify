@@ -173,6 +173,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 }
 .menu-wrap{padding-bottom:100px;}
 
+/* FECHADO OVERLAY */
+.closed-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.92);
+  z-index:999;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:32px;
+  text-align:center;
+}
+.closed-overlay.show{display:flex;}
+.closed-icon{font-size:64px;margin-bottom:20px;}
+.closed-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:900;
+  color:#fff;margin-bottom:10px;
+}
+.closed-title em{color:var(--accent);font-style:normal;}
+.closed-msg{font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:24px;}
+.closed-hours{
+  background:rgba(255,77,28,0.12);
+  border:1px solid rgba(255,77,28,0.3);
+  border-radius:14px;padding:14px 24px;
+  font-size:16px;font-weight:700;color:var(--accent);
+}
+
 /* ── OVERLAY / SHEET ── */
 .overlay{
   position:fixed;inset:0;
@@ -508,7 +536,18 @@ function updateCartBar(){
   document.getElementById('cart-bar').classList.toggle('hidden',n===0);
 }
 
+function estaAberto(){
+  var h = new Date().getHours();
+  var m = new Date().getMinutes();
+  var total = h * 60 + m;
+  return total >= 18*60 && total < 23*60;
+}
+
 function addItem(cat,idx,btn){
+  if(!estaAberto()){
+    document.getElementById('closed-overlay').classList.add('show');
+    return;
+  }
   const item=menu[cat].items[idx];
   if(item.isSuco){
     pendingSuco={cat,idx};currentSabor='';
@@ -587,7 +626,14 @@ function renderMenu(cat){
   document.getElementById('menu-content').innerHTML=h;
 }
 
-function openCart(){document.getElementById('overlay').classList.add('open');renderCart();}
+function openCart(){
+  if(!estaAberto()){
+    document.getElementById('closed-overlay').classList.add('show');
+    return;
+  }
+  document.getElementById('overlay').classList.add('open');
+  renderCart();
+}
 function closeCart(){document.getElementById('overlay').classList.remove('open');}
 function closeIfOutside(e){if(e.target===document.getElementById('overlay'))closeCart();}
 
@@ -761,20 +807,25 @@ function atualizarStatus(){
   var hora = agora.getHours();
   var minuto = agora.getMinutes();
   var totalMin = hora * 60 + minuto;
-  var abre = 18 * 60;   // 18:00
-  var fecha = 23 * 60;  // 23:00
+  var abre = 18 * 60;
+  var fecha = 23 * 60;
+  var aberto = totalMin >= abre && totalMin < fecha;
 
   var badge = document.getElementById('status-badge');
   var dot   = document.getElementById('status-dot');
   var txt   = document.getElementById('status-text');
+  var overlay = document.getElementById('closed-overlay');
+
   if(!badge) return;
 
-  if(totalMin >= abre && totalMin < fecha){
+  if(aberto){
     badge.style.background = 'rgba(34,197,94,0.12)';
     badge.style.border     = '1px solid rgba(34,197,94,0.3)';
     dot.style.background   = '#22C55E';
+    dot.style.animationName = 'pulse';
     txt.textContent        = 'Aberto agora';
     txt.style.color        = '#22C55E';
+    if(overlay) overlay.classList.remove('show');
   } else {
     badge.style.background = 'rgba(255,77,28,0.1)';
     badge.style.border     = '1px solid rgba(255,77,28,0.25)';
@@ -782,6 +833,7 @@ function atualizarStatus(){
     dot.style.animationName = 'none';
     txt.textContent        = 'Fechado no momento';
     txt.style.color        = '#FF7A45';
+    if(overlay) overlay.classList.add('show');
   }
 }
 atualizarStatus();
