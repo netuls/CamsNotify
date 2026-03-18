@@ -414,7 +414,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="logo">Burgão do <em>Netin</em></div>
     <div class="tagline">Artesanal &bull; Premium &bull; Fortaleza</div>
     <div class="hero-badge" id="status-badge"><span class="dot" id="status-dot"></span> <span id="status-text">Verificando...</span></div>
-    <div style="font-size:12px;color:var(--text3);margin-top:8px;font-weight:500;letter-spacing:0.5px;">Funcionamento: 18h00 &mdash; 23h00</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:8px;font-weight:500;letter-spacing:0.5px;">Funcionamento: 09h00 &mdash; 12h00</div>
   </div>
 
   <div class="cat-wrap">
@@ -566,7 +566,7 @@ function estaAberto(){
   var h = new Date().getHours();
   var m = new Date().getMinutes();
   var total = h * 60 + m;
-  return total >= 18*60 && total < 23*60;
+  return total >= 9*60 && total < 12*60;
 }
 
 function addItem(cat,idx,btn){
@@ -833,8 +833,8 @@ function atualizarStatus(){
   var hora = agora.getHours();
   var minuto = agora.getMinutes();
   var totalMin = hora * 60 + minuto;
-  var abre = 18 * 60;
-  var fecha = 23 * 60;
+  var abre = 9 * 60;
+  var fecha = 12 * 60;
   var aberto = totalMin >= abre && totalMin < fecha;
 
   var badge = document.getElementById('status-badge');
