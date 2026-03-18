@@ -177,6 +177,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* LOADING */
 .loading{text-align:center;padding:40px;color:var(--text3);font-size:14px;}
 
+/* HORARIO EDITOR */
+.horario-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:16px 18px;margin:0 16px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.horario-label{font-size:13px;font-weight:700;color:var(--text2);}
+.horario-inputs{display:flex;align-items:center;gap:8px;}
+.horario-input{
+  width:62px;border:1px solid var(--border2);border-radius:10px;
+  padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+  outline:none;color:var(--text);background:var(--surface2);text-align:center;
+  transition:border .2s;
+}
+.horario-input:focus{border-color:var(--accent);}
+.horario-sep{color:var(--text3);font-size:14px;font-weight:700;}
+.horario-save{
+  background:var(--accent);color:#fff;border:none;
+  border-radius:50px;padding:9px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .15s;
+}
+.horario-save:hover{opacity:0.9;}
+.horario-status{font-size:12px;color:var(--green);font-weight:600;display:none;margin-top:4px;width:100%;}
+
 /* CONFIRM MODAL */
 .confirm-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.75);
@@ -262,6 +288,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </div>
 
+  <!-- HORARIO DE FUNCIONAMENTO -->
+  <div class="horario-card">
+    <div>
+      <div class="horario-label">Horario de funcionamento</div>
+      <div class="horario-status" id="horario-status">Salvo com sucesso!</div>
+    </div>
+    <div class="horario-inputs">
+      <input class="horario-input" id="hora-abre"  type="number" min="0" max="23" value="18" title="Hora de abertura">
+      <span class="horario-sep">h ate</span>
+      <input class="horario-input" id="hora-fecha" type="number" min="0" max="23" value="23" title="Hora de fechamento">
+      <span class="horario-sep">h</span>
+      <button class="horario-save" onclick="salvarHorario()">Salvar</button>
+    </div>
+  </div>
+
   <div class="filters">
     <button class="filter-btn active" onclick="filtrar('todos',this)">Todos</button>
     <button class="filter-btn" onclick="filtrar('Novo',this)">Novos</button>
@@ -328,6 +369,7 @@ function fazerLogin(){
     // Aguarda Firebase estar pronto antes de carregar
     if(db){
       carregarPedidos();
+      carregarHorarioAdmin();
     } else {
       var tentativas = 0;
       var esperar = setInterval(function(){
@@ -335,6 +377,7 @@ function fazerLogin(){
         if(db){
           clearInterval(esperar);
           carregarPedidos();
+      carregarHorarioAdmin();
         } else if(tentativas > 20){
           clearInterval(esperar);
           document.getElementById('orders-wrap').innerHTML =
@@ -485,6 +528,40 @@ function buildCard(p){
     +'</div>'
     +'</div>';
 }
+
+// ── HORARIO DE FUNCIONAMENTO ──
+function carregarHorarioAdmin(){
+  if(!db) return;
+  db.collection('configuracoes').doc('horario').get()
+    .then(function(doc){
+      if(doc.exists){
+        var d = doc.data();
+        document.getElementById('hora-abre').value  = d.abre  || 18;
+        document.getElementById('hora-fecha').value = d.fecha || 23;
+      }
+    })
+    .catch(function(){});
+}
+
+function salvarHorario(){
+  if(!db){ alert('Firebase nao conectado.'); return; }
+  var abre  = parseInt(document.getElementById('hora-abre').value)  || 18;
+  var fecha = parseInt(document.getElementById('hora-fecha').value) || 23;
+
+  if(abre >= fecha){ alert('Hora de abertura deve ser menor que a hora de fechamento!'); return; }
+  if(abre < 0 || abre > 23 || fecha < 0 || fecha > 23){ alert('Horas invalidas. Use valores entre 0 e 23.'); return; }
+
+  db.collection('configuracoes').doc('horario').set({ abre: abre, fecha: fecha })
+    .then(function(){
+      var s = document.getElementById('horario-status');
+      s.style.display = 'block';
+      s.textContent = 'Salvo! Cardapio atualizado: '+pad(abre)+'h00 ate '+pad(fecha)+'h00';
+      setTimeout(function(){ s.style.display = 'none'; }, 3000);
+    })
+    .catch(function(e){ alert('Erro ao salvar: '+e.message); });
+}
+
+function pad(n){ return n < 10 ? '0'+n : ''+n; }
 
 // ── TOGGLE CARD ──
 function toggleCard(id){
