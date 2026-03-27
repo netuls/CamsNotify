@@ -1,0 +1,162 @@
+const express    = require('express');
+const webpush    = require('web-push');
+const cron       = require('node-cron');
+const cors       = require('cors');
+
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+// ===== CORS =====
+app.use(cors({
+  origin: '*', // Em produção coloque a URL do seu GitHub Pages
+  methods: ['GET','POST','DELETE'],
+}));
+app.use(express.json());
+
+// ===== VAPID KEYS =====
+// Gere suas chaves com: npx web-push generate-vapid-keys
+// e coloque nas variáveis de ambiente do Render
+const VAPID_PUBLIC  = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+const VAPID_EMAIL   = process.env.VAPID_EMAIL || 'mailto:camsnotify@email.com';
+
+if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
+  console.error('❌ VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY são obrigatórias!');
+  process.exit(1);
+}
+
+webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+
+// ===== STORAGE EM MEMÓRIA (simples, sem banco de dados) =====
+// subscriptions: { id: { subscription, reminders[] } }
+const subscriptions = {};
+
+// ===== ROTAS =====
+
+// Healthcheck
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: '🌸 CamsNotify Backend rodando!' });
+});
+
+// Retorna a chave pública VAPID pro frontend
+app.get('/vapid-public-key', (req, res) => {
+  res.json({ publicKey: VAPID_PUBLIC });
+});
+
+// Registra subscription de push
+app.post('/subscribe', (req, res) => {
+  const { subscription, userId } = req.body;
+  if (!subscription || !userId) return res.status(400).json({ error: 'Dados inválidos' });
+
+  if (!subscriptions[userId]) subscriptions[userId] = { subscription, reminders: [] };
+  else subscriptions[userId].subscription = subscription;
+
+  console.log(`✅ Usuário ${userId} registrado`);
+  res.json({ ok: true });
+});
+
+// Salva/sincroniza lembretes
+app.post('/reminders', (req, res) => {
+  const { userId, reminders } = req.body;
+  if (!userId || !Array.isArray(reminders)) return res.status(400).json({ error: 'Dados inválidos' });
+
+  if (!subscriptions[userId]) return res.status(404).json({ error: 'Usuário não registrado' });
+  subscriptions[userId].reminders = reminders;
+
+  console.log(`📝 ${reminders.length} lembretes salvos para ${userId}`);
+  res.json({ ok: true, count: reminders.length });
+});
+
+// Lista lembretes de um usuário
+app.get('/reminders/:userId', (req, res) => {
+  const user = subscriptions[req.params.userId];
+  if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+  res.json({ reminders: user.reminders });
+});
+
+// Dispara uma notificação de teste
+app.post('/test-notify', async (req, res) => {
+  const { userId } = req.body;
+  const user = subscriptions[userId];
+  if (!user) return res.status(404).json({ error: 'Usuário não registrado' });
+
+  try {
+    await sendPush(user.subscription, {
+      title: '🌸 CamsNotify',
+      body:  'Teste de notificação funcionando! 💕',
+      icon:  '/icons/icon-192.png',
+    });
+    res.json({ ok: true });
+  } catch(e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== FUNÇÃO ENVIAR PUSH =====
+async function sendPush(subscription, payload) {
+  await webpush.sendNotification(subscription, JSON.stringify(payload));
+}
+
+// ===== CRON: verifica a cada minuto =====
+cron.schedule('* * * * *', async () => {
+  const now     = new Date();
+  const pad     = n => String(n).padStart(2,'0');
+  const nowTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const nowDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  const nowDay  = now.getDay(); // 0=dom, 6=sab
+
+  for (const [userId, data] of Object.entries(subscriptions)) {
+    let changed = false;
+
+    for (const r of data.reminders) {
+      if (!r.active) continue;
+
+      const tMatch = r.time === nowTime;
+      let should = false;
+
+      if      (r.repeat === 'once'     && r.date === nowDate && tMatch && !r.fired)                          { should=true; r.fired=true; r.active=false; changed=true; }
+      else if (r.repeat === 'daily'    && tMatch && r.lastFired !== nowDate)                                  { should=true; r.lastFired=nowDate; changed=true; }
+      else if (r.repeat === 'weekdays' && nowDay>=1 && nowDay<=6 && tMatch && r.lastFired !== nowDate)        { should=true; r.lastFired=nowDate; changed=true; }
+      else if (r.repeat === 'weekends' && (nowDay===0||nowDay===6) && tMatch && r.lastFired !== nowDate)      { should=true; r.lastFired=nowDate; changed=true; }
+
+      if (should) {
+        console.log(`🔔 Disparando lembrete para ${userId}: "${r.msg}"`);
+        try {
+          await sendPush(data.subscription, {
+            title: '🌸 CamsNotify',
+            body:  r.msg,
+            icon:  '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            tag:   r.id,
+            data:  { id: r.id, msg: r.msg },
+          });
+        } catch(e) {
+          console.error(`Erro ao enviar push para ${userId}:`, e.statusCode || e.message);
+          // Se subscription inválida, remove
+          if (e.statusCode === 410) delete subscriptions[userId];
+        }
+      }
+    }
+
+    // Sincroniza estado atualizado
+    if (changed) {
+      console.log(`💾 Estado atualizado para ${userId}`);
+    }
+  }
+});
+
+app.listen(PORT, () => console.log(`🌸 CamsNotify Backend rodando na porta ${PORT}`));
+
+{
+  "name": "camsnotify-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
