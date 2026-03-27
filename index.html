@@ -4,13 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#ff4d94">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CamsNotify">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>CamsNotify 🌸</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --pink-50:  #fff5f9;
   --pink-100: #ffe0ef;
@@ -19,561 +22,291 @@
   --pink-400: #ff5ea8;
   --pink-500: #ff2d8a;
   --pink-600: #e0006a;
-  --hot:      #ff0076;
   --blush:    #fde8f3;
   --cream:    #fff9fc;
   --mauve:    #7b2d52;
   --text:     #3d1028;
   --light:    #b06b90;
   --shadow:   rgba(255,45,138,0.15);
-  --card-bg:  rgba(255,255,255,0.82);
+  --card-bg:  rgba(255,255,255,0.85);
 }
+html,body { height:100%; font-family:'Nunito',sans-serif; background:var(--cream); color:var(--text); overflow-x:hidden; -webkit-tap-highlight-color:transparent; }
 
-html, body {
-  height: 100%;
-  font-family: 'Nunito', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* === BACKGROUND === */
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
+  content:''; position:fixed; inset:0;
   background:
     radial-gradient(ellipse 80% 60% at 15% 10%, rgba(255,182,221,0.45) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 85% 85%, rgba(255,80,168,0.22) 0%, transparent 55%),
     radial-gradient(ellipse 100% 100% at 50% 50%, var(--cream) 30%, #fde0ee 100%);
-  pointer-events: none;
-  z-index: 0;
+  pointer-events:none; z-index:0;
 }
 
-/* === FLORES DECORATIVAS === */
-.deco {
-  position: fixed;
-  pointer-events: none;
-  z-index: 0;
-  font-size: 28px;
-  opacity: 0.18;
-  animation: floatDeco 6s ease-in-out infinite;
-}
-.deco:nth-child(1) { top: 5%; left: 5%;  font-size: 36px; animation-delay: 0s; }
-.deco:nth-child(2) { top: 12%; right: 8%; font-size: 24px; animation-delay: 1s; }
-.deco:nth-child(3) { top: 40%; left: 2%;  font-size: 20px; animation-delay: 2s; }
-.deco:nth-child(4) { bottom: 20%; right: 5%; font-size: 30px; animation-delay: 0.5s; }
-.deco:nth-child(5) { bottom: 8%; left: 10%; font-size: 22px; animation-delay: 1.5s; }
+.deco { position:fixed; pointer-events:none; z-index:0; opacity:0.15; animation:floatDeco 6s ease-in-out infinite; }
+.deco:nth-child(1){top:4%;left:4%;font-size:34px;animation-delay:0s}
+.deco:nth-child(2){top:10%;right:6%;font-size:22px;animation-delay:1s}
+.deco:nth-child(3){top:38%;left:2%;font-size:18px;animation-delay:2s}
+.deco:nth-child(4){bottom:22%;right:4%;font-size:28px;animation-delay:.5s}
+.deco:nth-child(5){bottom:6%;left:8%;font-size:20px;animation-delay:1.5s}
+@keyframes floatDeco{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(8deg)}}
 
-@keyframes floatDeco {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(8deg); }
-}
+.wrapper { position:relative; z-index:1; max-width:430px; margin:0 auto; padding:0 16px 100px; }
 
-/* === WRAPPER === */
-.wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 430px;
-  margin: 0 auto;
-  padding: 0 16px 100px;
-  min-height: 100vh;
-}
-
-/* === HEADER === */
-header {
-  text-align: center;
-  padding: 40px 0 24px;
-  animation: fadeDown 0.6s ease both;
-}
-
-@keyframes fadeDown {
-  from { opacity: 0; transform: translateY(-18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.logo-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
+/* HEADER */
+header { text-align:center; padding:36px 0 22px; animation:fadeDown .6s ease both; }
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+.logo-wrap { display:inline-flex; align-items:center; gap:12px; margin-bottom:6px; }
 .logo-icon {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  box-shadow: 0 6px 24px rgba(255,45,138,0.35), 0 2px 4px rgba(0,0,0,0.08);
-  animation: pulse 3s ease-in-out infinite;
+  width:52px; height:52px;
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-600));
+  border-radius:18px; display:flex; align-items:center; justify-content:center;
+  font-size:26px; box-shadow:0 6px 24px rgba(255,45,138,.35);
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 6px 24px rgba(255,45,138,.35)}50%{box-shadow:0 6px 36px rgba(255,45,138,.55)}}
+.logo-name { font-family:'Playfair Display',serif; font-size:30px; font-weight:700; background:linear-gradient(135deg,var(--pink-500),var(--pink-600)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.tagline { font-size:13px; color:var(--light); font-weight:400; }
+
+/* INSTALL BANNER */
+#install-banner {
+  background:linear-gradient(135deg,#7b2d52,#3d1028);
+  color:white; border-radius:20px; padding:16px 18px;
+  margin-bottom:16px; display:none; align-items:center; gap:14px;
+  box-shadow:0 6px 24px rgba(61,16,40,.25);
+  animation:slideUp .5s ease both;
+}
+#install-banner.show { display:flex; }
+#install-banner .ib-icon { font-size:28px; flex-shrink:0; }
+#install-banner .ib-text { flex:1; }
+#install-banner h4 { font-size:14px; font-weight:700; margin-bottom:3px; }
+#install-banner p  { font-size:12px; opacity:.85; line-height:1.4; }
+.btn-install {
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-600));
+  color:white; border:none; border-radius:12px;
+  padding:10px 14px; font-family:'Nunito',sans-serif; font-size:13px;
+  font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0;
+  box-shadow:0 3px 12px rgba(255,45,138,.35);
 }
 
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 6px 24px rgba(255,45,138,0.35); }
-  50% { box-shadow: 0 6px 36px rgba(255,45,138,0.55); }
-}
-
-.logo-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 32px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--pink-500), var(--pink-600));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.5px;
-}
-
-.tagline {
-  font-size: 13px;
-  color: var(--light);
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-/* === NOTIF BANNER === */
-#notif-banner {
-  background: linear-gradient(135deg, #ff4d94, #c2006e);
-  color: white;
-  border-radius: 20px;
-  padding: 18px 20px;
-  margin-bottom: 20px;
-  text-align: center;
-  box-shadow: 0 6px 24px rgba(255,45,138,0.35);
-  animation: slideUp 0.5s 0.2s ease both;
-}
-
-#notif-banner .banner-icon { font-size: 32px; margin-bottom: 8px; }
-#notif-banner h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 6px; }
-#notif-banner p { font-size: 13px; opacity: 0.9; margin-bottom: 14px; line-height: 1.5; }
-
-.btn-allow {
-  background: white;
-  color: var(--pink-600);
-  border: none;
-  border-radius: 30px;
-  padding: 12px 28px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-}
-.btn-allow:active { transform: scale(0.96); }
-
-/* === STATUS BADGE === */
+/* STATUS */
 #status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.75);
-  border: 1.5px solid var(--pink-200);
-  border-radius: 30px;
-  padding: 7px 16px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--light);
-  margin-bottom: 20px;
-  backdrop-filter: blur(8px);
-  animation: slideUp 0.5s 0.15s ease both;
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.75); border:1.5px solid var(--pink-200);
+  border-radius:30px; padding:7px 16px; font-size:12.5px; font-weight:600;
+  color:var(--light); margin-bottom:18px; backdrop-filter:blur(8px);
+  animation:slideUp .5s .15s ease both;
 }
-#status-badge .dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #ccc;
-  transition: background 0.3s;
-}
-#status-badge.on .dot { background: #22d47b; box-shadow: 0 0 6px #22d47b; }
-#status-badge.on { color: #1a8f55; border-color: #a8f0cc; background: rgba(230,255,242,0.85); }
+#status-badge .dot { width:8px; height:8px; border-radius:50%; background:#ccc; transition:background .3s; }
+#status-badge.on .dot { background:#22d47b; box-shadow:0 0 6px #22d47b; }
+#status-badge.on { color:#1a8f55; border-color:#a8f0cc; background:rgba(230,255,242,.85); }
+#status-badge.warn .dot { background:#f59e0b; box-shadow:0 0 6px #f59e0b; }
+#status-badge.warn { color:#92400e; border-color:#fde68a; background:rgba(255,251,235,.85); }
 
-/* === CARDS === */
+/* CARDS */
 .card {
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 24px;
-  padding: 24px 20px;
-  margin-bottom: 18px;
-  border: 1.5px solid rgba(255,182,221,0.45);
-  box-shadow: 0 8px 32px var(--shadow), 0 1px 0 rgba(255,255,255,0.9) inset;
-  animation: slideUp 0.5s ease both;
+  background:var(--card-bg); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-radius:24px; padding:24px 20px; margin-bottom:18px;
+  border:1.5px solid rgba(255,182,221,.45);
+  box-shadow:0 8px 32px var(--shadow), 0 1px 0 rgba(255,255,255,.9) inset;
+  animation:slideUp .5s ease both;
 }
+@keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-of-type(1){animation-delay:.3s} .card:nth-of-type(2){animation-delay:.45s}
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.card-header { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.card-header-icon { width:38px; height:38px; background:var(--blush); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.card-header h2 { font-family:'Playfair Display',serif; font-size:17px; color:var(--mauve); font-weight:500; }
 
-.card:nth-child(1) { animation-delay: 0.3s; }
-.card:nth-child(2) { animation-delay: 0.45s; }
+.field { margin-bottom:16px; }
+label { display:block; font-size:11.5px; font-weight:700; color:var(--light); letter-spacing:.9px; text-transform:uppercase; margin-bottom:8px; }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+input[type="text"],input[type="time"],input[type="date"],textarea {
+  width:100%; padding:14px 16px;
+  border:1.5px solid var(--pink-100); border-radius:14px;
+  background:var(--pink-50); font-family:'Nunito',sans-serif;
+  font-size:15px; color:var(--text); outline:none;
+  transition:border-color .2s,box-shadow .2s; -webkit-appearance:none; appearance:none;
 }
-.card-header-icon {
-  width: 38px; height: 38px;
-  background: var(--blush);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
-.card-header h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 17px;
-  color: var(--mauve);
-  font-weight: 500;
-}
+input:focus,textarea:focus { border-color:var(--pink-300); box-shadow:0 0 0 4px rgba(255,93,168,.12); background:white; }
+textarea { resize:none; min-height:88px; line-height:1.5; }
 
-/* === FIELDS === */
-.field { margin-bottom: 16px; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-label {
-  display: block;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--light);
-  letter-spacing: 0.9px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-input[type="text"],
-input[type="time"],
-input[type="date"],
-textarea {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1.5px solid var(--pink-100);
-  border-radius: 14px;
-  background: var(--pink-50);
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-input:focus, textarea:focus {
-  border-color: var(--pink-300);
-  box-shadow: 0 0 0 4px rgba(255,93,168,0.12);
-  background: white;
-}
-
-textarea {
-  resize: none;
-  min-height: 90px;
-  line-height: 1.5;
-}
-
-/* === ROW === */
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-/* === REPEAT SELECT === */
-.repeat-options {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.repeat-options { display:flex; gap:8px; flex-wrap:wrap; }
 .repeat-opt {
-  flex: 1;
-  min-width: 60px;
-  padding: 10px 8px;
-  border: 1.5px solid var(--pink-100);
-  border-radius: 12px;
-  background: var(--pink-50);
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--light);
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.18s;
-  -webkit-tap-highlight-color: transparent;
+  flex:1; min-width:58px; padding:10px 6px;
+  border:1.5px solid var(--pink-100); border-radius:12px;
+  background:var(--pink-50); font-family:'Nunito',sans-serif;
+  font-size:11.5px; font-weight:700; color:var(--light);
+  text-align:center; cursor:pointer; transition:all .18s;
+  -webkit-tap-highlight-color:transparent;
 }
 .repeat-opt.active {
-  background: linear-gradient(135deg, var(--pink-400), var(--pink-500));
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(255,93,168,0.3);
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-500));
+  color:white; border-color:transparent;
+  box-shadow:0 4px 12px rgba(255,93,168,.3);
 }
 
-/* === ADD BUTTON === */
 .btn-add {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
-  color: white;
-  border: none;
-  border-radius: 16px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 6px 24px rgba(255,45,138,0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-  -webkit-tap-highlight-color: transparent;
+  width:100%; padding:16px;
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-600));
+  color:white; border:none; border-radius:16px;
+  font-family:'Nunito',sans-serif; font-size:16px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 6px 24px rgba(255,45,138,.35);
+  transition:transform .15s,box-shadow .15s; -webkit-tap-highlight-color:transparent;
 }
-.btn-add:active { transform: scale(0.97); box-shadow: 0 3px 12px rgba(255,45,138,0.25); }
-.btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-add:active { transform:scale(.97); }
+.btn-add:disabled { opacity:.5; cursor:not-allowed; }
 
-/* === LEMBRETE LIST === */
-#reminders-list { animation-delay: 0.55s; }
-
-.empty-state {
-  text-align: center;
-  padding: 28px 16px;
-  color: var(--light);
-}
-.empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
-.empty-state p { font-size: 14px; line-height: 1.6; }
+/* LIST */
+.empty-state { text-align:center; padding:28px 16px; color:var(--light); }
+.empty-state .empty-icon { font-size:40px; margin-bottom:10px; }
+.empty-state p { font-size:14px; line-height:1.6; }
 
 .reminder-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--pink-100);
-  animation: slideUp 0.35s ease both;
-  position: relative;
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 0; border-bottom:1px solid var(--pink-100);
+  animation:slideUp .35s ease both;
 }
-.reminder-item:last-child { border-bottom: none; }
+.reminder-item:last-child { border-bottom:none; }
+.ri-icon { width:42px; height:42px; min-width:42px; background:linear-gradient(135deg,var(--pink-200),var(--pink-300)); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+.ri-info { flex:1; min-width:0; }
+.ri-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:5px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ri-meta { display:flex; flex-wrap:wrap; gap:5px; }
+.ri-badge { font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:20px; background:var(--blush); color:var(--pink-600); white-space:nowrap; }
+.ri-badge.time { background:linear-gradient(135deg,var(--pink-400),var(--pink-500)); color:white; }
 
-.ri-icon {
-  width: 44px; height: 44px;
-  min-width: 44px;
-  background: linear-gradient(135deg, var(--pink-200), var(--pink-300));
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-
-.ri-info { flex: 1; }
-.ri-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-.ri-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-.ri-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: var(--blush);
-  color: var(--pink-600);
-}
-.ri-badge.time { background: linear-gradient(135deg, var(--pink-400), var(--pink-500)); color: white; }
-
-.ri-delete {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: var(--pink-300);
-  padding: 6px;
-  border-radius: 10px;
-  transition: color 0.15s, background 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  min-width: 36px;
-  min-height: 36px;
-  display: flex; align-items: center; justify-content: center;
-}
-.ri-delete:hover, .ri-delete:active { color: var(--pink-600); background: var(--blush); }
-
+.ri-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
 .ri-toggle {
-  position: relative;
-  width: 42px; height: 24px;
-  background: var(--pink-200);
-  border-radius: 30px;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s;
-  min-width: 42px;
-  flex-shrink: 0;
+  position:relative; width:40px; height:22px;
+  background:var(--pink-200); border-radius:30px;
+  cursor:pointer; border:none; transition:background .2s; flex-shrink:0;
 }
 .ri-toggle::after {
-  content: '';
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 18px; height: 18px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.2s;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  content:''; position:absolute; top:3px; left:3px;
+  width:16px; height:16px; background:white; border-radius:50%;
+  transition:transform .2s; box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
-.ri-toggle.on { background: linear-gradient(135deg, var(--pink-400), var(--pink-500)); }
-.ri-toggle.on::after { transform: translateX(18px); }
+.ri-toggle.on { background:linear-gradient(135deg,var(--pink-400),var(--pink-500)); }
+.ri-toggle.on::after { transform:translateX(18px); }
 
-/* === TOAST === */
-#toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: linear-gradient(135deg, #3d1028, #7b2d52);
-  color: white;
-  padding: 14px 24px;
-  border-radius: 30px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-  z-index: 9999;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  max-width: calc(100vw - 40px);
-  text-align: center;
-  white-space: nowrap;
+.ri-delete {
+  background:none; border:none; font-size:16px; cursor:pointer;
+  color:var(--pink-300); padding:6px; border-radius:10px;
+  transition:color .15s,background .15s; -webkit-tap-highlight-color:transparent;
+  min-width:34px; min-height:34px; display:flex; align-items:center; justify-content:center;
 }
-#toast.show { transform: translateX(-50%) translateY(0); }
+.ri-delete:active { color:var(--pink-600); background:var(--blush); }
 
-/* === MODAL NOTIFICAÇÃO === */
+/* MODAL */
 #notif-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  align-items: flex-end;
-  justify-content: center;
-  background: rgba(61,16,40,0.4);
-  backdrop-filter: blur(4px);
-  padding: 0 16px 24px;
+  display:none; position:fixed; inset:0; z-index:9998;
+  align-items:flex-end; justify-content:center;
+  background:rgba(61,16,40,.4); backdrop-filter:blur(4px);
+  padding:0 16px 28px;
 }
-#notif-modal.open { display: flex; animation: fadeIn 0.25s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+#notif-modal.open { display:flex; animation:fadeIn .25s ease; }
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .notif-popup {
-  background: white;
-  border-radius: 28px;
-  padding: 28px 24px;
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  animation: popUp 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+  background:white; border-radius:28px; padding:28px 22px;
+  width:100%; max-width:420px; text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  animation:popUp .35s cubic-bezier(.34,1.56,.64,1) both;
 }
-@keyframes popUp {
-  from { transform: translateY(60px) scale(0.95); opacity: 0; }
-  to   { transform: translateY(0) scale(1);     opacity: 1; }
-}
-
-.notif-popup-icon { font-size: 52px; margin-bottom: 12px; }
-.notif-popup h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--mauve); margin-bottom: 8px; }
-.notif-popup p  { font-size: 14px; color: var(--light); line-height: 1.6; margin-bottom: 20px; }
-.notif-popup-msg {
-  background: var(--blush);
-  border-radius: 16px;
-  padding: 16px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 20px;
-  border-left: 4px solid var(--pink-400);
+@keyframes popUp{from{transform:translateY(60px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.notif-popup-icon { font-size:52px; margin-bottom:10px; }
+.notif-popup h3 { font-family:'Playfair Display',serif; font-size:20px; color:var(--mauve); margin-bottom:6px; }
+.notif-popup p  { font-size:13px; color:var(--light); line-height:1.5; margin-bottom:14px; }
+.notif-popup-msg { background:var(--blush); border-radius:16px; padding:16px; font-size:15px; font-weight:700; color:var(--text); margin-bottom:18px; border-left:4px solid var(--pink-400); text-align:left; }
+.popup-btns { display:flex; gap:10px; }
+.btn-snooze {
+  flex:1; padding:13px; background:var(--blush); color:var(--pink-600);
+  border:none; border-radius:14px; font-family:'Nunito',sans-serif;
+  font-size:14px; font-weight:700; cursor:pointer;
 }
 .btn-dismiss {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(255,45,138,0.3);
+  flex:2; padding:13px;
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-600));
+  color:white; border:none; border-radius:14px;
+  font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; box-shadow:0 4px 16px rgba(255,45,138,.3);
 }
 
-/* === BLOCKED OVERLAY === */
+/* BLOCKED */
 #blocked-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: linear-gradient(160deg, #ffb3d1 0%, #ff4d94 50%, #c2006e 100%);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 32px;
-  color: white;
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:linear-gradient(160deg,#ffb3d1 0%,#ff4d94 50%,#c2006e 100%);
+  flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:32px; color:white;
 }
-#blocked-overlay.show { display: flex; }
-#blocked-overlay .block-icon { font-size: 72px; margin-bottom: 20px; animation: shake 0.6s ease; }
-@keyframes shake {
-  0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)}
-}
-#blocked-overlay h2 { font-family:'Playfair Display',serif; font-size:26px; margin-bottom:14px; }
-#blocked-overlay p  { font-size:15px; line-height:1.7; opacity:0.92; margin-bottom:24px; }
+#blocked-overlay.show { display:flex; }
+#blocked-overlay .block-icon { font-size:68px; margin-bottom:18px; animation:shake .6s ease; }
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+#blocked-overlay h2 { font-family:'Playfair Display',serif; font-size:24px; margin-bottom:12px; }
+#blocked-overlay p  { font-size:14px; line-height:1.7; opacity:.92; margin-bottom:22px; }
 .btn-retry {
-  background: white;
-  color: var(--pink-600);
-  border: none;
-  border-radius: 30px;
-  padding: 14px 36px;
-  font-family:'Nunito',sans-serif;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 4px 20px rgba(0,0,0,0.15);
+  background:white; color:var(--pink-600); border:none; border-radius:30px;
+  padding:14px 36px; font-family:'Nunito',sans-serif; font-size:16px;
+  font-weight:700; cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,.15);
+  margin-bottom:12px; display:block; width:100%; max-width:280px;
 }
+.blocked-hint { font-size:12px; opacity:.7; margin-top:8px; }
+
+/* TOAST */
+#toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:linear-gradient(135deg,#3d1028,#7b2d52);
+  color:white; padding:13px 22px; border-radius:30px;
+  font-size:14px; font-weight:600;
+  box-shadow:0 8px 32px rgba(0,0,0,.2); z-index:9999;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  max-width:calc(100vw - 40px); text-align:center;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+
+/* iOS hint */
+.ios-hint {
+  background:rgba(255,255,255,.7); border:1.5px solid var(--pink-200);
+  border-radius:16px; padding:14px 16px; margin-bottom:16px;
+  font-size:12.5px; color:var(--mauve); line-height:1.6;
+  display:none; text-align:center; backdrop-filter:blur(8px);
+}
+.ios-hint.show { display:block; animation:slideUp .5s ease; }
+.ios-hint strong { color:var(--pink-600); }
 </style>
 </head>
 <body>
 
-<!-- Flores decorativas -->
 <div class="deco">🌸</div>
 <div class="deco">🌺</div>
 <div class="deco">✨</div>
 <div class="deco">💗</div>
 <div class="deco">🌷</div>
 
-<!-- OVERLAY BLOQUEADO -->
+<!-- BLOCKED -->
 <div id="blocked-overlay">
   <div class="block-icon">🔔</div>
   <h2>Ativa as notificações, bb! 💕</h2>
-  <p>O CamsNotify precisa da permissão de notificações pra te lembrar das coisas. Sem isso o app não funciona, tá bem? 🌸</p>
-  <button class="btn-retry" onclick="requestPermission()">Ativar Notificações</button>
-  <p style="margin-top:16px;font-size:12px;opacity:0.75;">Se não aparecer a opção, vá nas configurações do seu celular e permita notificações para este site.</p>
+  <p>O CamsNotify precisa da permissão de notificações pra te lembrar das coisas. Sem isso o app não funciona! 🌸</p>
+  <button class="btn-retry" onclick="requestPermission()">Permitir Notificações 🔔</button>
+  <p class="blocked-hint">Se não aparecer a opção, vá nas configurações do celular → Notificações → e ative para este site.</p>
 </div>
 
-<!-- NOTIF MODAL (fallback visual) -->
+<!-- NOTIF MODAL -->
 <div id="notif-modal">
   <div class="notif-popup">
     <div class="notif-popup-icon">🔔</div>
     <h3>Hora do lembrete! 💕</h3>
     <p>CamsNotify está te lembrando:</p>
     <div class="notif-popup-msg" id="notif-popup-text">—</div>
-    <button class="btn-dismiss" onclick="closeModal()">Entendido! ✨</button>
+    <div class="popup-btns">
+      <button class="btn-snooze" onclick="snoozeModal()">⏰ +5 min</button>
+      <button class="btn-dismiss" onclick="closeModal()">Ok, entendi! ✨</button>
+    </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <div class="wrapper">
@@ -585,12 +318,27 @@ textarea {
     <p class="tagline">seus lembretes com muito amor 💕</p>
   </header>
 
-  <div id="status-badge">
-    <span class="dot"></span>
-    <span id="status-text">Verificando notificações…</span>
+  <!-- Install banner -->
+  <div id="install-banner">
+    <div class="ib-icon">📲</div>
+    <div class="ib-text">
+      <h4>Instalar no celular</h4>
+      <p>Instale como app pra notificações em background!</p>
+    </div>
+    <button class="btn-install" onclick="installPWA()">Instalar</button>
   </div>
 
-  <!-- FORM CARD -->
+  <!-- iOS hint -->
+  <div class="ios-hint" id="ios-hint">
+    📱 <strong>iPhone/iPad:</strong> Para instalar, toque em <strong>Compartilhar</strong> (⬆️) → <strong>"Adicionar à Tela de Início"</strong>. Assim as notificações funcionam melhor!
+  </div>
+
+  <div id="status-badge">
+    <span class="dot"></span>
+    <span id="status-text">Verificando…</span>
+  </div>
+
+  <!-- FORM -->
   <div class="card">
     <div class="card-header">
       <div class="card-header-icon">📝</div>
@@ -599,7 +347,7 @@ textarea {
 
     <div class="field">
       <label>O que você quer lembrar?</label>
-      <textarea id="inp-msg" placeholder="Ex: Tomar o remédio, ligar pra mãe, beber água... 💧"></textarea>
+      <textarea id="inp-msg" placeholder="Ex: Tomar o remédio, ligar pra mãe, beber água 💧..."></textarea>
     </div>
 
     <div class="row">
@@ -609,17 +357,17 @@ textarea {
       </div>
       <div class="field">
         <label>Data 📅</label>
-        <input type="date" id="inp-date">
+        <input type="date" id="inp-date" id="inp-date">
       </div>
     </div>
 
     <div class="field">
       <label>Repetir</label>
       <div class="repeat-options">
-        <div class="repeat-opt active" data-val="once" onclick="selectRepeat(this)">Uma vez</div>
-        <div class="repeat-opt" data-val="daily" onclick="selectRepeat(this)">Todo dia</div>
-        <div class="repeat-opt" data-val="weekdays" onclick="selectRepeat(this)">Sem. a Sab.</div>
-        <div class="repeat-opt" data-val="weekends" onclick="selectRepeat(this)">Fins sem.</div>
+        <div class="repeat-opt active" data-val="once"     onclick="selectRepeat(this)">Uma vez</div>
+        <div class="repeat-opt"        data-val="daily"    onclick="selectRepeat(this)">Todo dia</div>
+        <div class="repeat-opt"        data-val="weekdays" onclick="selectRepeat(this)">Seg–Sab</div>
+        <div class="repeat-opt"        data-val="weekends" onclick="selectRepeat(this)">Fins sem.</div>
       </div>
     </div>
 
@@ -628,8 +376,8 @@ textarea {
     </button>
   </div>
 
-  <!-- LIST CARD -->
-  <div class="card" id="reminders-list">
+  <!-- LIST -->
+  <div class="card">
     <div class="card-header">
       <div class="card-header-icon">🗂️</div>
       <h2>Meus lembretes</h2>
@@ -645,128 +393,169 @@ textarea {
 
 <script>
 // ===== STATE =====
-let reminders = JSON.parse(localStorage.getItem('cams_reminders') || '[]');
+let reminders = [];
 let selectedRepeat = 'once';
+let deferredInstallPrompt = null;
+let swRegistration = null;
 let checkInterval = null;
-let notifPermission = 'default';
+let snoozeMsg = null;
+
+// ===== LOAD FROM CACHE (IndexedDB via Cache API) =====
+async function loadReminders() {
+  try {
+    const cache = await caches.open('camsnotify-v1');
+    const resp  = await cache.match('reminders-data');
+    if (resp) reminders = await resp.json();
+  } catch(e) {
+    reminders = JSON.parse(localStorage.getItem('cams_reminders') || '[]');
+  }
+}
+
+async function saveReminders() {
+  try {
+    const cache = await caches.open('camsnotify-v1');
+    await cache.put('reminders-data', new Response(JSON.stringify(reminders)));
+  } catch(e) {}
+  localStorage.setItem('cams_reminders', JSON.stringify(reminders));
+  // Atualiza SW
+  if (swRegistration && swRegistration.active) {
+    swRegistration.active.postMessage({ type:'SET_REMINDERS', reminders });
+  }
+}
 
 // ===== INIT =====
 window.addEventListener('load', async () => {
+  await loadReminders();
   setDefaultDateTime();
   renderList();
-
-  if (!('Notification' in window)) {
-    showBlocked('Seu navegador não suporta notificações. Tente abrir pelo Chrome ou Safari.');
-    return;
-  }
-
-  notifPermission = Notification.permission;
-
-  if (notifPermission === 'granted') {
-    setStatusOn();
-    startChecker();
-  } else if (notifPermission === 'denied') {
-    showBlocked();
-  } else {
-    // Mostrar banner e pedir permissão
-    await requestPermission();
-  }
+  detectPlatform();
+  await initServiceWorker();
+  checkPermissionState();
+  startChecker();
 });
 
-function setDefaultDateTime() {
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  document.getElementById('inp-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  const h = pad(now.getHours());
-  const m = pad(now.getMinutes());
-  document.getElementById('inp-time').value = `${h}:${m}`;
+function detectPlatform() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+  if (isIOS && !isStandalone) {
+    document.getElementById('ios-hint').classList.add('show');
+  }
 }
 
+// ===== SERVICE WORKER =====
+async function initServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    swRegistration = await navigator.serviceWorker.register('./sw.js');
+    console.log('SW registrado!');
+
+    // Periodic Background Sync (Android Chrome)
+    if ('periodicSync' in swRegistration) {
+      try {
+        await swRegistration.periodicSync.register('check-reminders', { minInterval: 60 * 1000 });
+      } catch(e) { console.log('PeriodicSync não disponível'); }
+    }
+  } catch(e) {
+    console.log('SW falhou:', e);
+  }
+}
+
+// ===== PWA INSTALL =====
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+async function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('install-banner').classList.remove('show');
+    showToast('🌸 App instalado com sucesso!');
+  }
+  deferredInstallPrompt = null;
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+  showToast('✅ CamsNotify instalado! 💕');
+});
+
 // ===== PERMISSION =====
+function checkPermissionState() {
+  if (!('Notification' in window)) {
+    showBlocked('Seu navegador não suporta notificações. Use Chrome ou Safari.');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    setStatusOn();
+  } else if (Notification.permission === 'denied') {
+    showBlocked();
+  } else {
+    requestPermission();
+  }
+}
+
 async function requestPermission() {
   try {
     const result = await Notification.requestPermission();
-    notifPermission = result;
     if (result === 'granted') {
       setStatusOn();
-      startChecker();
       document.getElementById('blocked-overlay').classList.remove('show');
       showToast('✅ Notificações ativadas! 💕');
     } else {
       showBlocked();
     }
-  } catch(e) {
-    showBlocked();
-  }
+  } catch(e) { showBlocked(); }
 }
 
 function showBlocked(msg) {
-  const overlay = document.getElementById('blocked-overlay');
-  overlay.classList.add('show');
-  if (msg) {
-    overlay.querySelector('p').textContent = msg;
-  }
+  const o = document.getElementById('blocked-overlay');
+  o.classList.add('show');
+  if (msg) o.querySelector('p').textContent = msg;
 }
 
 function setStatusOn() {
-  const badge = document.getElementById('status-badge');
-  badge.classList.add('on');
-  document.getElementById('status-text').textContent = 'Notificações ativas ✨';
+  const b = document.getElementById('status-badge');
+  b.className = 'on';
+  // Reaplica o elemento dot
+  b.innerHTML = '<span class="dot"></span><span id="status-text">Notificações ativas ✨</span>';
   document.getElementById('btn-add').disabled = false;
 }
 
-// ===== CHECKER =====
+// ===== CHECKER (foreground) =====
 function startChecker() {
   if (checkInterval) clearInterval(checkInterval);
-  checkInterval = setInterval(checkReminders, 15000); // a cada 15s
+  checkInterval = setInterval(checkReminders, 10000);
   checkReminders();
 }
 
 function checkReminders() {
+  if (Notification.permission !== 'granted') return;
   const now = new Date();
   const pad = n => String(n).padStart(2,'0');
   const nowTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const nowDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  const nowDay  = now.getDay(); // 0=dom, 6=sab
-
+  const nowDay  = now.getDay();
   let changed = false;
 
   reminders.forEach(r => {
     if (!r.active) return;
+    const tMatch = r.time === nowTime;
+    let should = false;
 
-    const timeMatch = r.time === nowTime;
-    let dateMatch = false;
+    if      (r.repeat === 'once'     && r.date === nowDate && tMatch && !r.fired)            { should=true; r.fired=true; r.active=false; changed=true; }
+    else if (r.repeat === 'daily'    && tMatch && r.lastFired !== nowDate)                   { should=true; r.lastFired=nowDate; changed=true; }
+    else if (r.repeat === 'weekdays' && nowDay>=1 && nowDay<=6 && tMatch && r.lastFired !== nowDate) { should=true; r.lastFired=nowDate; changed=true; }
+    else if (r.repeat === 'weekends' && (nowDay===0||nowDay===6) && tMatch && r.lastFired !== nowDate) { should=true; r.lastFired=nowDate; changed=true; }
 
-    if (r.repeat === 'once') {
-      dateMatch = r.date === nowDate;
-      if (timeMatch && dateMatch && !r.fired) {
-        fireReminder(r);
-        r.fired = true;
-        r.active = false;
-        changed = true;
-      }
-    } else if (r.repeat === 'daily') {
-      if (timeMatch && r.lastFired !== nowDate) {
-        fireReminder(r);
-        r.lastFired = nowDate;
-        changed = true;
-      }
-    } else if (r.repeat === 'weekdays') {
-      if (nowDay >= 1 && nowDay <= 6 && timeMatch && r.lastFired !== nowDate) {
-        fireReminder(r);
-        r.lastFired = nowDate;
-        changed = true;
-      }
-    } else if (r.repeat === 'weekends') {
-      if ((nowDay === 0 || nowDay === 6) && timeMatch && r.lastFired !== nowDate) {
-        fireReminder(r);
-        r.lastFired = nowDate;
-        changed = true;
-      }
-    }
+    if (should) fireReminder(r);
   });
 
-  if (changed) saveAndRender();
+  if (changed) { saveReminders(); renderList(); }
 }
 
 function fireReminder(r) {
@@ -775,161 +564,137 @@ function fireReminder(r) {
     try {
       const n = new Notification('🌸 CamsNotify', {
         body: r.msg,
-        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌸</text></svg>',
-        badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>',
-        vibrate: [200, 100, 200],
-        tag: r.id,
+        icon: './icons/icon-192.png',
+        badge: './icons/icon-192.png',
+        vibrate: [200,100,200,100,200],
         requireInteraction: true,
+        tag: r.id,
       });
       n.onclick = () => { window.focus(); n.close(); showModal(r.msg); };
     } catch(e) {}
   }
-  // Sempre mostra modal visual também
   showModal(r.msg);
 }
 
 // ===== MODAL =====
+let currentModalMsg = '';
 function showModal(msg) {
+  currentModalMsg = msg;
   document.getElementById('notif-popup-text').textContent = msg;
   document.getElementById('notif-modal').classList.add('open');
-  // Vibrar se suportar
-  if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+  if ('vibrate' in navigator) navigator.vibrate([200,100,200]);
 }
-function closeModal() {
-  document.getElementById('notif-modal').classList.remove('open');
+function closeModal() { document.getElementById('notif-modal').classList.remove('open'); }
+function snoozeModal() {
+  closeModal();
+  showToast('⏰ Lembrete adiado em 5 minutos!');
+  const msg = currentModalMsg;
+  setTimeout(() => showModal(msg), 5 * 60 * 1000);
 }
 
-// ===== REPEAT SELECT =====
+// ===== FORM =====
+function setDefaultDateTime() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('inp-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  document.getElementById('inp-time').value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 function selectRepeat(el) {
   document.querySelectorAll('.repeat-opt').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
   selectedRepeat = el.dataset.val;
-
-  const dateInput = document.getElementById('inp-date');
-  dateInput.disabled = selectedRepeat !== 'once';
-  if (selectedRepeat !== 'once') dateInput.style.opacity = '0.4';
-  else dateInput.style.opacity = '1';
+  const di = document.getElementById('inp-date');
+  di.disabled = selectedRepeat !== 'once';
+  di.style.opacity = selectedRepeat !== 'once' ? '0.4' : '1';
 }
 
-// ===== ADD REMINDER =====
-function addReminder() {
-  if (Notification.permission !== 'granted') {
-    showToast('⚠️ Ative as notificações primeiro!');
-    return;
-  }
-
+async function addReminder() {
+  if (Notification.permission !== 'granted') { showToast('⚠️ Ative as notificações primeiro!'); return; }
   const msg  = document.getElementById('inp-msg').value.trim();
   const time = document.getElementById('inp-time').value;
   const date = document.getElementById('inp-date').value;
-
   if (!msg)  { showToast('✏️ Escreve o que quer lembrar!'); return; }
   if (!time) { showToast('⏰ Escolhe o horário!'); return; }
   if (selectedRepeat === 'once' && !date) { showToast('📅 Escolhe a data!'); return; }
 
-  const r = {
-    id: Date.now().toString(),
-    msg, time, date,
-    repeat: selectedRepeat,
-    active: true,
-    fired: false,
-    lastFired: null,
-  };
-
+  const r = { id: Date.now().toString(), msg, time, date, repeat: selectedRepeat, active: true, fired: false, lastFired: null };
   reminders.unshift(r);
-  saveAndRender();
-
+  await saveReminders();
+  renderList();
   document.getElementById('inp-msg').value = '';
-  showToast('🌸 Lembrete adicionado com sucesso!');
+  showToast('🌸 Lembrete adicionado!');
 }
 
 // ===== RENDER =====
 function renderList() {
   const content = document.getElementById('list-content');
-  const active = reminders.filter(r => r.active);
-
+  const active = reminders.filter(r => r.active || r.repeat !== 'once');
   if (active.length === 0) {
     content.innerHTML = `<div class="empty-state"><div class="empty-icon">🌷</div><p>Nenhum lembrete ainda.<br>Adicione um aqui em cima! 💕</p></div>`;
     return;
   }
-
-  const repeatLabel = { once:'Uma vez', daily:'Todo dia', weekdays:'Sem. a Sab.', weekends:'Fins de semana' };
+  const repeatLabel = { once:'Uma vez', daily:'Todo dia', weekdays:'Seg–Sab', weekends:'Fins de semana' };
   const icons = ['🌸','💕','⭐','🌺','✨','💖','🦋','🍓'];
-
-  content.innerHTML = active.map((r, i) => {
-    const icon = icons[i % icons.length];
-    const timeDisplay = formatTime(r.time);
-    const dateDisplay = r.repeat === 'once' ? formatDate(r.date) : '';
-    return `
-    <div class="reminder-item" id="ri-${r.id}">
-      <div class="ri-icon">${icon}</div>
+  content.innerHTML = active.map((r,i) => `
+    <div class="reminder-item">
+      <div class="ri-icon">${icons[i % icons.length]}</div>
       <div class="ri-info">
-        <div class="ri-title">${escapeHtml(r.msg)}</div>
+        <div class="ri-title">${escHtml(r.msg)}</div>
         <div class="ri-meta">
-          <span class="ri-badge time">⏰ ${timeDisplay}</span>
-          ${dateDisplay ? `<span class="ri-badge">📅 ${dateDisplay}</span>` : ''}
+          <span class="ri-badge time">⏰ ${fmtTime(r.time)}</span>
+          ${r.repeat==='once' ? `<span class="ri-badge">📅 ${fmtDate(r.date)}</span>` : ''}
           <span class="ri-badge">🔁 ${repeatLabel[r.repeat]}</span>
+          ${!r.active ? '<span class="ri-badge" style="background:#f3f3f3;color:#999">✅ Concluído</span>' : ''}
         </div>
       </div>
-      <button class="ri-toggle on" id="tog-${r.id}" onclick="toggleReminder('${r.id}')" title="Pausar/Ativar"></button>
-      <button class="ri-delete" onclick="deleteReminder('${r.id}')" title="Excluir">🗑️</button>
-    </div>`;
-  }).join('');
+      <div class="ri-actions">
+        ${r.active ? `<button class="ri-toggle on" onclick="toggleReminder('${r.id}')" title="Pausar"></button>` : ''}
+        <button class="ri-delete" onclick="deleteReminder('${r.id}')" title="Excluir">🗑️</button>
+      </div>
+    </div>`).join('');
 }
 
-function toggleReminder(id) {
+async function toggleReminder(id) {
   const r = reminders.find(x => x.id === id);
   if (!r) return;
   r.active = !r.active;
-  const btn = document.getElementById(`tog-${id}`);
-  if (btn) btn.classList.toggle('on', r.active);
-  saveAndRender();
-  showToast(r.active ? '✅ Lembrete ativado!' : '⏸️ Lembrete pausado!');
+  await saveReminders(); renderList();
+  showToast(r.active ? '✅ Ativado!' : '⏸️ Pausado!');
 }
 
-function deleteReminder(id) {
+async function deleteReminder(id) {
   reminders = reminders.filter(r => r.id !== id);
-  saveAndRender();
-  showToast('🗑️ Lembrete removido!');
-}
-
-function saveAndRender() {
-  localStorage.setItem('cams_reminders', JSON.stringify(reminders));
-  renderList();
+  await saveReminders(); renderList();
+  showToast('🗑️ Removido!');
 }
 
 // ===== TOAST =====
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ===== HELPERS =====
-function formatTime(t) {
+function fmtTime(t) {
   if (!t) return '';
-  const [h, m] = t.split(':');
+  const [h,m] = t.split(':');
   const hr = parseInt(h);
-  const ampm = hr >= 12 ? 'PM' : 'AM';
-  const h12 = hr % 12 || 12;
-  return `${h12}:${m} ${ampm}`;
+  return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`;
 }
-
-function formatDate(d) {
+function fmtDate(d) {
   if (!d) return '';
-  const [y, m, day] = d.split('-');
+  const [y,m,day] = d.split('-');
   return `${day}/${m}/${y}`;
 }
-
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Mantém o checker rodando após visibilidade
+// Checar quando volta ao foco
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && Notification.permission === 'granted') {
-    checkReminders();
-  }
+  if (document.visibilityState === 'visible') checkReminders();
 });
 </script>
 </body>
