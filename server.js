@@ -146,4 +146,16 @@ cron.schedule('* * * * *', async () => {
   }
 });
 
-app.listen(PORT, () => console.log(`🌸 CamsNotify Backend rodando na porta ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🌸 CamsNotify Backend rodando na porta ${PORT}`);
+
+  // Keep-alive: pinga o próprio servidor a cada 10 minutos
+  const https = require('https');
+  setInterval(() => {
+    https.get('https://camsnotify-backend.onrender.com', (res) => {
+      console.log(`♻️ Keep-alive ping: ${res.statusCode}`);
+    }).on('error', (e) => {
+      console.log('Keep-alive erro:', e.message);
+    });
+  }, 10 * 60 * 1000); // 10 minutos
+});
