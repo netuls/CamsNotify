@@ -1,0 +1,14 @@
+{
+  "name": "CamsNotify",
+  "short_name": "CamsNotify",
+  "description": "Seus lembretes com muito amor 💕",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff9fc",
+  "theme_color": "#ff4d94",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
